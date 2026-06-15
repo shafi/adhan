@@ -1,6 +1,6 @@
 {
-  "name": "Prayer Times",
-  "short_name": "Prayer Times",
+  "name": "Adhan",
+  "short_name": "Adhan",
   "start_url": "/",
   "display": "fullscreen",
   "background_color": "#07130f",

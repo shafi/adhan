@@ -1,4 +1,4 @@
-# Prayer Times
+# Adhan
 
 Static tablet kiosk web app for Islamic prayer times.
 
@@ -16,8 +16,8 @@ Static tablet kiosk web app for Islamic prayer times.
 Open `index.html` directly, or run:
 
 ```sh
-docker build -t prayer-times .
-docker run --rm -p 8080:80 prayer-times
+docker build -t adhan .
+docker run --rm -p 8080:80 adhan
 ```
 
 Geolocation requires HTTPS in most browsers unless served from `localhost`.

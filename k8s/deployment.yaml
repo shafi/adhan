@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: prayer-times
+  name: adhan
   labels:
-    app.kubernetes.io/name: prayer-times
+    app.kubernetes.io/name: adhan
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: prayer-times
+      app.kubernetes.io/name: adhan
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: prayer-times
+        app.kubernetes.io/name: adhan
     spec:
       containers:
         - name: app
@@ -40,4 +40,4 @@ spec:
       volumes:
         - name: web
           configMap:
-            name: prayer-times-web
+            name: adhan-web
