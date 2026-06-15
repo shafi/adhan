@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#102820" />
+    <meta name="description" content="Tablet kiosk prayer times with geolocation and adhan playback." />
+    <title>Prayer Times</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-label="Current prayer status">
+        <div class="topbar">
+          <div>
+            <p class="label">Prayer Times</p>
+            <h1 id="locationName">Finding location...</h1>
+          </div>
+          <button id="audioButton" class="icon-button" type="button" title="Enable adhan audio" aria-label="Enable adhan audio">
+            <span aria-hidden="true">♪</span>
+          </button>
+        </div>
+
+        <div class="time-grid">
+          <div>
+            <p class="label">Now</p>
+            <div id="clock" class="clock">--:--</div>
+            <div id="date" class="date">Loading date</div>
+          </div>
+          <div class="next-panel">
+            <p class="label">Next Prayer</p>
+            <div id="nextPrayer" class="next-prayer">--</div>
+            <div id="countdown" class="countdown">--:--:--</div>
+          </div>
+        </div>
+
+        <div id="status" class="status" role="status">Requesting browser geolocation.</div>
+      </section>
+
+      <section class="schedule" aria-label="Daily prayer schedule">
+        <div class="section-heading">
+          <h2>Today</h2>
+          <select id="methodSelect" aria-label="Calculation method">
+            <option value="MWL">Muslim World League</option>
+            <option value="ISNA">ISNA</option>
+            <option value="Egypt">Egyptian Authority</option>
+            <option value="Makkah">Umm al-Qura, Makkah</option>
+            <option value="Karachi">Karachi</option>
+          </select>
+        </div>
+        <div id="prayerList" class="prayer-list"></div>
+      </section>
+    </main>
+
+    <audio id="adhanAudio" preload="auto" src="/adhan.mp3"></audio>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

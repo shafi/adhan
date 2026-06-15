@@ -1,0 +1,255 @@
+:root {
+  color-scheme: dark;
+  --bg: #07130f;
+  --panel: #102820;
+  --panel-2: #f3efe4;
+  --ink: #f8f4e8;
+  --muted: #b8c5bb;
+  --accent: #d6a74a;
+  --accent-2: #54a08a;
+  --danger: #f08a73;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(120deg, rgba(84, 160, 138, 0.18), transparent 36%),
+    radial-gradient(circle at 85% 15%, rgba(214, 167, 74, 0.2), transparent 28%),
+    var(--bg);
+  color: var(--ink);
+}
+
+button,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  gap: clamp(18px, 3vw, 34px);
+  min-height: 100vh;
+  padding: clamp(18px, 3vw, 36px);
+}
+
+.hero,
+.schedule {
+  border: 1px solid rgba(248, 244, 232, 0.14);
+  border-radius: 8px;
+  background: rgba(16, 40, 32, 0.82);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100vh - clamp(36px, 6vw, 72px));
+  padding: clamp(22px, 4vw, 48px);
+}
+
+.topbar,
+.section-heading,
+.time-grid,
+.prayer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.label {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: clamp(0.78rem, 1.2vw, 0.96rem);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1.05;
+}
+
+h1 {
+  max-width: 14ch;
+  font-size: clamp(2rem, 4.3vw, 5rem);
+}
+
+h2 {
+  font-size: clamp(1.6rem, 2.6vw, 3rem);
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: clamp(56px, 7vw, 82px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(248, 244, 232, 0.22);
+  border-radius: 8px;
+  background: rgba(248, 244, 232, 0.08);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-button span {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  line-height: 1;
+}
+
+.icon-button.enabled {
+  border-color: rgba(214, 167, 74, 0.8);
+  background: rgba(214, 167, 74, 0.18);
+}
+
+.time-grid {
+  align-items: stretch;
+  margin: clamp(42px, 7vw, 90px) 0;
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(4rem, 12vw, 12rem);
+  font-weight: 850;
+  line-height: 0.95;
+}
+
+.date {
+  color: var(--muted);
+  font-size: clamp(1.1rem, 2vw, 1.8rem);
+}
+
+.next-panel {
+  align-self: center;
+  min-width: min(320px, 42vw);
+  padding: clamp(18px, 3vw, 32px);
+  border-left: 4px solid var(--accent);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.next-prayer {
+  font-size: clamp(2.2rem, 5vw, 5.5rem);
+  font-weight: 850;
+  line-height: 1;
+}
+
+.countdown {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: clamp(1.6rem, 3vw, 3rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  min-height: 48px;
+  padding: 14px 16px;
+  border: 1px solid rgba(248, 244, 232, 0.14);
+  border-radius: 8px;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.18);
+  font-size: clamp(0.98rem, 1.4vw, 1.25rem);
+}
+
+.status.error {
+  border-color: rgba(240, 138, 115, 0.5);
+  color: #ffd5ca;
+}
+
+.schedule {
+  align-self: stretch;
+  padding: clamp(18px, 3vw, 30px);
+  background: var(--panel-2);
+  color: #1a211c;
+}
+
+.section-heading {
+  margin-bottom: 18px;
+}
+
+select {
+  max-width: 240px;
+  padding: 11px 12px;
+  border: 1px solid rgba(26, 33, 28, 0.22);
+  border-radius: 8px;
+  color: #1a211c;
+  background: #fffaf0;
+}
+
+.prayer-list {
+  display: grid;
+  gap: 10px;
+}
+
+.prayer-row {
+  min-height: clamp(66px, 9vh, 96px);
+  padding: 14px clamp(14px, 2vw, 24px);
+  border: 1px solid rgba(26, 33, 28, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+.prayer-row.active {
+  border-color: rgba(84, 160, 138, 0.7);
+  background: rgba(84, 160, 138, 0.16);
+}
+
+.prayer-name {
+  font-size: clamp(1.3rem, 2.1vw, 2.2rem);
+  font-weight: 800;
+}
+
+.prayer-time {
+  font-size: clamp(1.4rem, 2.4vw, 2.6rem);
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    min-height: auto;
+  }
+
+  .time-grid {
+    flex-direction: column;
+  }
+
+  .next-panel {
+    align-self: stretch;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .topbar,
+  .section-heading,
+  .prayer-row {
+    align-items: flex-start;
+  }
+
+  .section-heading,
+  .prayer-row {
+    flex-direction: column;
+  }
+
+  select {
+    width: 100%;
+    max-width: none;
+  }
+}

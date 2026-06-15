@@ -1,0 +1,9 @@
+{
+  "name": "Prayer Times",
+  "short_name": "Prayer Times",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#07130f",
+  "theme_color": "#102820",
+  "icons": []
+}
