@@ -12,7 +12,7 @@ const state = {
   coords: null,
   times: null,
   audioEnabled: localStorage.getItem("adhanAudioEnabled") === "true",
-  method: localStorage.getItem("prayerMethod") || "MWL",
+  method: localStorage.getItem("prayerMethod") || "ISNA",
   playedKeys: new Set(JSON.parse(localStorage.getItem("playedAdhans") || "[]")),
 };
 
@@ -22,6 +22,7 @@ const elements = {
   clock: document.getElementById("clock"),
   countdown: document.getElementById("countdown"),
   date: document.getElementById("date"),
+  hijriDate: document.getElementById("hijriDate"),
   locationName: document.getElementById("locationName"),
   methodSelect: document.getElementById("methodSelect"),
   nextPrayer: document.getElementById("nextPrayer"),
@@ -120,6 +121,7 @@ function updateRuntime() {
     month: "long",
     day: "numeric",
   }).format(now);
+  elements.hijriDate.textContent = formatHijriDate(now);
 
   if (!state.times) return;
   const next = getNextPrayer(now, state.times);
@@ -201,10 +203,10 @@ async function testAudio() {
     elements.audio.pause();
     elements.audio.currentTime = 0;
     elements.audio.volume = 1;
-    setStatus("Adhan audio is enabled. Add /adhan.mp3 to customize the recording.");
+    setStatus("Adhan audio is enabled.");
   } catch {
     speak("Adhan audio is enabled.");
-    setStatus("Adhan audio is enabled. Browser speech will be used until /adhan.mp3 is available.");
+    setStatus("Adhan audio is enabled. Browser speech will be used if the remote audio is unavailable.");
   }
 }
 
@@ -317,8 +319,10 @@ function hourAngleMinutes(latitude, declination, zenith) {
 
 function asrMinutes(latitude, declination, factor) {
   const lat = degToRad(latitude);
-  const angle = -radToDeg(Math.atan(1 / (factor + Math.tan(Math.abs(lat - declination)))));
-  return hourAngleMinutes(latitude, declination, 90 - angle);
+  const altitude = Math.atan(1 / (factor + Math.tan(Math.abs(lat - declination))));
+  const cosH = (Math.sin(altitude) - Math.sin(lat) * Math.sin(declination)) / (Math.cos(lat) * Math.cos(declination));
+  const bounded = Math.min(1, Math.max(-1, cosH));
+  return radToDeg(Math.acos(bounded)) * 4;
 }
 
 function minutesToDate(base, minutes) {
@@ -327,6 +331,15 @@ function minutesToDate(base, minutes) {
 
 function formatTime(date) {
   return new Intl.DateTimeFormat([], { hour: "numeric", minute: "2-digit" }).format(date);
+}
+
+function formatHijriDate(date) {
+  return new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
 }
 
 function formatDuration(ms) {

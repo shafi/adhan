@@ -1,12 +1,13 @@
 :root {
   color-scheme: dark;
-  --bg: #07130f;
-  --panel: #102820;
-  --panel-2: #f3efe4;
-  --ink: #f8f4e8;
-  --muted: #b8c5bb;
-  --accent: #d6a74a;
-  --accent-2: #54a08a;
+  --bg: #071512;
+  --panel: #123329;
+  --panel-2: #f7f1df;
+  --ink: #fbf7eb;
+  --muted: #c9d2c6;
+  --accent: #d9b35c;
+  --accent-2: #6aa88d;
+  --line: rgba(217, 179, 92, 0.24);
   --danger: #f08a73;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -24,8 +25,9 @@ body {
 body {
   margin: 0;
   background:
-    linear-gradient(120deg, rgba(84, 160, 138, 0.18), transparent 36%),
-    radial-gradient(circle at 85% 15%, rgba(214, 167, 74, 0.2), transparent 28%),
+    linear-gradient(135deg, rgba(106, 168, 141, 0.18), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(217, 179, 92, 0.2), transparent 24%),
+    repeating-linear-gradient(45deg, rgba(217, 179, 92, 0.04) 0 1px, transparent 1px 30px),
     var(--bg);
   color: var(--ink);
 }
@@ -38,9 +40,9 @@ select {
 .app-shell {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
-  gap: clamp(18px, 3vw, 34px);
+  gap: clamp(16px, 2.5vw, 28px);
   min-height: 100vh;
-  padding: clamp(18px, 3vw, 36px);
+  padding: clamp(16px, 2.6vw, 30px);
 }
 
 .hero,
@@ -48,15 +50,29 @@ select {
   border: 1px solid rgba(248, 244, 232, 0.14);
   border-radius: 8px;
   background: rgba(16, 40, 32, 0.82);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(217, 179, 92, 0.08);
 }
 
 .hero {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: calc(100vh - clamp(36px, 6vw, 72px));
-  padding: clamp(22px, 4vw, 48px);
+  min-height: calc(100vh - clamp(32px, 5.2vw, 60px));
+  padding: clamp(20px, 3.3vw, 40px);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "الله";
+  position: absolute;
+  right: clamp(18px, 4vw, 54px);
+  bottom: clamp(58px, 9vw, 110px);
+  color: rgba(217, 179, 92, 0.08);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(7rem, 18vw, 17rem);
+  line-height: 1;
+  pointer-events: none;
 }
 
 .topbar,
@@ -72,7 +88,7 @@ select {
 .label {
   margin: 0 0 8px;
   color: var(--accent);
-  font-size: clamp(0.78rem, 1.2vw, 0.96rem);
+  font-size: clamp(0.72rem, 1vw, 0.86rem);
   font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -86,19 +102,19 @@ h2 {
 
 h1 {
   max-width: 14ch;
-  font-size: clamp(2rem, 4.3vw, 5rem);
+  font-size: clamp(1.8rem, 3.4vw, 4rem);
 }
 
 h2 {
-  font-size: clamp(1.6rem, 2.6vw, 3rem);
+  font-size: clamp(1.35rem, 2.1vw, 2.4rem);
 }
 
 .icon-button {
   display: grid;
   place-items: center;
-  width: clamp(56px, 7vw, 82px);
+  width: clamp(50px, 5.6vw, 68px);
   aspect-ratio: 1;
-  border: 1px solid rgba(248, 244, 232, 0.22);
+  border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(248, 244, 232, 0.08);
   color: var(--ink);
@@ -106,7 +122,7 @@ h2 {
 }
 
 .icon-button span {
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.55rem, 2.3vw, 2.1rem);
   line-height: 1;
 }
 
@@ -117,31 +133,39 @@ h2 {
 
 .time-grid {
   align-items: stretch;
-  margin: clamp(42px, 7vw, 90px) 0;
+  margin: clamp(34px, 5.6vw, 72px) 0;
+  position: relative;
+  z-index: 1;
 }
 
 .clock {
   font-variant-numeric: tabular-nums;
-  font-size: clamp(4rem, 12vw, 12rem);
+  font-size: clamp(3.4rem, 9.5vw, 9.4rem);
   font-weight: 850;
   line-height: 0.95;
 }
 
-.date {
+.date,
+.hijri-date {
   color: var(--muted);
-  font-size: clamp(1.1rem, 2vw, 1.8rem);
+  font-size: clamp(0.98rem, 1.55vw, 1.4rem);
+}
+
+.hijri-date {
+  margin-top: 6px;
+  color: #e5c97f;
 }
 
 .next-panel {
   align-self: center;
-  min-width: min(320px, 42vw);
-  padding: clamp(18px, 3vw, 32px);
+  min-width: min(280px, 36vw);
+  padding: clamp(16px, 2.4vw, 26px);
   border-left: 4px solid var(--accent);
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .next-prayer {
-  font-size: clamp(2.2rem, 5vw, 5.5rem);
+  font-size: clamp(1.9rem, 3.8vw, 4.2rem);
   font-weight: 850;
   line-height: 1;
 }
@@ -149,7 +173,7 @@ h2 {
 .countdown {
   margin-top: 10px;
   color: var(--muted);
-  font-size: clamp(1.6rem, 3vw, 3rem);
+  font-size: clamp(1.35rem, 2.4vw, 2.4rem);
   font-variant-numeric: tabular-nums;
 }
 
@@ -160,7 +184,9 @@ h2 {
   border-radius: 8px;
   color: var(--muted);
   background: rgba(0, 0, 0, 0.18);
-  font-size: clamp(0.98rem, 1.4vw, 1.25rem);
+  font-size: clamp(0.9rem, 1.15vw, 1.08rem);
+  position: relative;
+  z-index: 1;
 }
 
 .status.error {
@@ -171,7 +197,9 @@ h2 {
 .schedule {
   align-self: stretch;
   padding: clamp(18px, 3vw, 30px);
-  background: var(--panel-2);
+  background:
+    linear-gradient(180deg, rgba(217, 179, 92, 0.13), transparent 28%),
+    var(--panel-2);
   color: #1a211c;
 }
 
@@ -194,25 +222,25 @@ select {
 }
 
 .prayer-row {
-  min-height: clamp(66px, 9vh, 96px);
-  padding: 14px clamp(14px, 2vw, 24px);
+  min-height: clamp(58px, 7.4vh, 82px);
+  padding: 12px clamp(14px, 1.8vw, 22px);
   border: 1px solid rgba(26, 33, 28, 0.1);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.48);
 }
 
 .prayer-row.active {
-  border-color: rgba(84, 160, 138, 0.7);
-  background: rgba(84, 160, 138, 0.16);
+  border-color: rgba(106, 168, 141, 0.7);
+  background: rgba(106, 168, 141, 0.18);
 }
 
 .prayer-name {
-  font-size: clamp(1.3rem, 2.1vw, 2.2rem);
+  font-size: clamp(1.15rem, 1.7vw, 1.8rem);
   font-weight: 800;
 }
 
 .prayer-time {
-  font-size: clamp(1.4rem, 2.4vw, 2.6rem);
+  font-size: clamp(1.2rem, 1.9vw, 2rem);
   font-weight: 850;
   font-variant-numeric: tabular-nums;
 }
