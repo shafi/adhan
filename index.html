@@ -13,9 +13,12 @@
     <main class="app-shell">
       <section class="hero" aria-label="Current prayer status">
         <div class="topbar">
-          <div>
-            <p class="label">Adhan</p>
-            <h1 id="locationName">Finding location...</h1>
+          <div class="brand-block">
+            <div class="brand-mark" aria-hidden="true"><span></span></div>
+            <div>
+              <p class="label">Adhan <span class="arabic-label" lang="ar">الأذان</span></p>
+              <h1 id="locationName">Finding location...</h1>
+            </div>
           </div>
           <button id="audioButton" class="icon-button" type="button" title="Enable adhan audio" aria-label="Enable adhan audio">
             <span aria-hidden="true">♪</span>
@@ -40,6 +43,7 @@
       </section>
 
       <section class="schedule" aria-label="Daily prayer schedule">
+        <div class="ornament" aria-hidden="true"><span></span></div>
         <div class="section-heading">
           <h2>Today</h2>
           <select id="methodSelect" aria-label="Calculation method">
