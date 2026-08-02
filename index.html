@@ -77,37 +77,39 @@
       </section>
     </main>
 
-    <dialog id="settingsDialog" class="settings-dialog">
-      <form method="dialog" class="settings-form">
-        <div class="section-heading">
-          <h2>Settings</h2>
-          <button type="submit" class="icon-button settings-close" aria-label="Close settings">
-            <span aria-hidden="true">×</span>
-          </button>
+    <div id="settingsOverlay" class="settings-overlay" hidden>
+      <div id="settingsDialog" class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+        <div class="settings-form">
+          <div class="section-heading">
+            <h2 id="settingsTitle">Settings</h2>
+            <button type="button" id="settingsCloseButton" class="icon-button settings-close" aria-label="Close settings">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <label class="settings-field">
+            <span class="label">Claude API key</span>
+            <input id="apiKeyInput" type="password" autocomplete="off" placeholder="sk-ant-..." />
+            <span class="settings-hint">Used to look up the nearest masjid's iqama times. Stored only in this browser.</span>
+          </label>
+
+          <label class="settings-field">
+            <span class="label">Adhan reciter</span>
+            <select id="adhanReciterSelect"></select>
+          </label>
+
+          <label class="settings-field">
+            <span class="label">Fajr adhan</span>
+            <select id="fajrAdhanSelect"></select>
+          </label>
+
+          <div class="settings-field">
+            <span class="label">Play adhan for</span>
+            <div id="prayerToggleList" class="toggle-list"></div>
+          </div>
         </div>
-
-        <label class="settings-field">
-          <span class="label">Claude API key</span>
-          <input id="apiKeyInput" type="password" autocomplete="off" placeholder="sk-ant-..." />
-          <span class="settings-hint">Used to look up the nearest masjid's iqama times. Stored only in this browser.</span>
-        </label>
-
-        <label class="settings-field">
-          <span class="label">Adhan reciter</span>
-          <select id="adhanReciterSelect"></select>
-        </label>
-
-        <label class="settings-field">
-          <span class="label">Fajr adhan</span>
-          <select id="fajrAdhanSelect"></select>
-        </label>
-
-        <div class="settings-field">
-          <span class="label">Play adhan for</span>
-          <div id="prayerToggleList" class="toggle-list"></div>
-        </div>
-      </form>
-    </dialog>
+      </div>
+    </div>
 
     <audio id="adhanAudio" preload="auto"></audio>
     <script src="/azkar.js" defer></script>

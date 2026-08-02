@@ -55,7 +55,8 @@ const elements = {
   audio: document.getElementById("adhanAudio"),
   audioButton: document.getElementById("audioButton"),
   settingsButton: document.getElementById("settingsButton"),
-  settingsDialog: document.getElementById("settingsDialog"),
+  settingsOverlay: document.getElementById("settingsOverlay"),
+  settingsCloseButton: document.getElementById("settingsCloseButton"),
   apiKeyInput: document.getElementById("apiKeyInput"),
   adhanReciterSelect: document.getElementById("adhanReciterSelect"),
   fajrAdhanSelect: document.getElementById("fajrAdhanSelect"),
@@ -91,10 +92,23 @@ elements.audioButton.addEventListener("click", async () => {
 
 elements.settingsButton.addEventListener("click", () => {
   elements.apiKeyInput.value = localStorage.getItem("claudeApiKey") || "";
-  elements.settingsDialog.showModal();
+  elements.settingsOverlay.hidden = false;
 });
 
-elements.settingsDialog.addEventListener("close", () => {
+elements.settingsCloseButton.addEventListener("click", closeSettings);
+
+elements.settingsOverlay.addEventListener("click", (event) => {
+  if (event.target === elements.settingsOverlay) closeSettings();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !elements.settingsOverlay.hidden) closeSettings();
+});
+
+function closeSettings() {
+  if (elements.settingsOverlay.hidden) return;
+  elements.settingsOverlay.hidden = true;
+
   const trimmed = elements.apiKeyInput.value.trim();
   const previous = localStorage.getItem("claudeApiKey") || "";
   if (trimmed) {
@@ -107,7 +121,7 @@ elements.settingsDialog.addEventListener("close", () => {
     maybeLookupMasjid(true);
   }
   renderMasjidCard();
-});
+}
 
 elements.adhanReciterSelect.addEventListener("change", () => {
   state.adhanId = elements.adhanReciterSelect.value;
