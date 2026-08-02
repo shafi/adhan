@@ -8,17 +8,58 @@ const METHODS = {
   Karachi: { fajr: 18, isha: 18 },
 };
 
+// Sunni adhan recordings from https://praytimes.org/docs/adhan
+const ADHAN_OPTIONS = [
+  { id: "Abdul-Basit", label: "Abdul Basit" },
+  { id: "Abdul-Ghaffar", label: "Abdul Ghaffar" },
+  { id: "Abdul-Hakam", label: "Abdul Hakam" },
+  { id: "Adhan-Alaqsa", label: "Adhan Al-Aqsa" },
+  { id: "Adhan-Egypt", label: "Adhan Egypt" },
+  { id: "Adhan-Halab", label: "Adhan Halab" },
+  { id: "Adhan-Madinah", label: "Adhan Madinah" },
+  { id: "Adhan-Makkah", label: "Adhan Mecca" },
+  { id: "Al-Hussaini", label: "Al-Hussaini" },
+  { id: "Bakir-Bash", label: "Bakir Bash" },
+  { id: "Hafez", label: "Hafez" },
+  { id: "Hafiz-Murad", label: "Hafiz Murad" },
+  { id: "Minshawi", label: "Minshawi" },
+  { id: "Naghshbandi", label: "Naghshbandi" },
+  { id: "Saber", label: "Saber" },
+  { id: "Sharif-Doman", label: "Sharif Doman" },
+  { id: "Yusuf-Islam", label: "Yusuf Islam" },
+];
+const DEFAULT_ADHAN_ID = "Adhan-Madinah";
+
+// Fajr has its own, separate dropdown (currently a single option).
+const FAJR_ADHAN_OPTIONS = [
+  {
+    id: "Mishary-Rashid-al-Afasy-Fajr",
+    label: "Mishary Rashid al-Afasy (Fajr)",
+    url: "https://archive.org/download/adhan.notifications/Mishary_Rashid_al_Afasy_Fajr_Adhan.mp3",
+  },
+];
+const DEFAULT_FAJR_ADHAN_ID = FAJR_ADHAN_OPTIONS[0].id;
+
 const state = {
   coords: null,
   times: null,
   audioEnabled: localStorage.getItem("adhanAudioEnabled") === "true",
   method: localStorage.getItem("prayerMethod") || "ISNA",
+  adhanId: localStorage.getItem("adhanReciter") || DEFAULT_ADHAN_ID,
+  fajrAdhanId: localStorage.getItem("fajrAdhanReciter") || DEFAULT_FAJR_ADHAN_ID,
+  prayerAudio: loadPrayerAudioPrefs(),
   playedKeys: new Set(JSON.parse(localStorage.getItem("playedAdhans") || "[]")),
 };
 
 const elements = {
   audio: document.getElementById("adhanAudio"),
   audioButton: document.getElementById("audioButton"),
+  settingsButton: document.getElementById("settingsButton"),
+  settingsDialog: document.getElementById("settingsDialog"),
+  apiKeyInput: document.getElementById("apiKeyInput"),
+  adhanReciterSelect: document.getElementById("adhanReciterSelect"),
+  fajrAdhanSelect: document.getElementById("fajrAdhanSelect"),
+  prayerToggleList: document.getElementById("prayerToggleList"),
   clock: document.getElementById("clock"),
   countdown: document.getElementById("countdown"),
   date: document.getElementById("date"),
@@ -28,19 +69,54 @@ const elements = {
   nextPrayer: document.getElementById("nextPrayer"),
   prayerList: document.getElementById("prayerList"),
   status: document.getElementById("status"),
+  masjidCard: document.getElementById("masjidCard"),
+  duaCard: document.getElementById("duaCard"),
 };
 
 elements.methodSelect.value = state.method;
 updateAudioButton();
+buildSettingsDialog();
 startClock();
 requestWakeLock();
 locate();
+renderMasjidCard();
+renderDuaOfDay();
 
 elements.audioButton.addEventListener("click", async () => {
   state.audioEnabled = true;
   localStorage.setItem("adhanAudioEnabled", "true");
   updateAudioButton();
   await testAudio();
+});
+
+elements.settingsButton.addEventListener("click", () => {
+  elements.apiKeyInput.value = localStorage.getItem("claudeApiKey") || "";
+  elements.settingsDialog.showModal();
+});
+
+elements.settingsDialog.addEventListener("close", () => {
+  const trimmed = elements.apiKeyInput.value.trim();
+  const previous = localStorage.getItem("claudeApiKey") || "";
+  if (trimmed) {
+    localStorage.setItem("claudeApiKey", trimmed);
+  } else {
+    localStorage.removeItem("claudeApiKey");
+  }
+  if (trimmed !== previous) {
+    localStorage.removeItem("masjidInfo");
+    maybeLookupMasjid(true);
+  }
+  renderMasjidCard();
+});
+
+elements.adhanReciterSelect.addEventListener("change", () => {
+  state.adhanId = elements.adhanReciterSelect.value;
+  localStorage.setItem("adhanReciter", state.adhanId);
+});
+
+elements.fajrAdhanSelect.addEventListener("change", () => {
+  state.fajrAdhanId = elements.fajrAdhanSelect.value;
+  localStorage.setItem("fajrAdhanReciter", state.fajrAdhanId);
 });
 
 elements.methodSelect.addEventListener("change", () => {
@@ -72,6 +148,7 @@ function locate() {
       setStatus("Location locked. Prayer times are calculated on this tablet.");
       reverseGeocode();
       recalculate();
+      maybeLookupMasjid();
     },
     (error) => {
       setStatus(`Location permission is required for automatic prayer times: ${error.message}`, true);
@@ -108,6 +185,7 @@ function startClock() {
   updateRuntime();
   setInterval(updateRuntime, 1000);
   setInterval(recalculate, 10 * 60 * 1000);
+  setInterval(renderDuaOfDay, 10 * 60 * 1000);
 }
 
 function updateRuntime() {
@@ -175,6 +253,7 @@ function maybePlayAdhan(now) {
   if (!state.audioEnabled || !state.times) return;
 
   for (const name of ADHAN_PRAYERS) {
+    if (!state.prayerAudio[name]) continue;
     const prayerTime = state.times[name];
     const delta = Math.abs(now - prayerTime);
     const key = `${dateKey(prayerTime)}-${name}`;
@@ -186,9 +265,70 @@ function maybePlayAdhan(now) {
   }
 }
 
+function loadPrayerAudioPrefs() {
+  const stored = JSON.parse(localStorage.getItem("prayerAudioEnabled") || "null") || {};
+  const prefs = {};
+  for (const name of ADHAN_PRAYERS) {
+    prefs[name] = stored[name] !== undefined ? stored[name] : true;
+  }
+  return prefs;
+}
+
+function savePrayerAudioPrefs() {
+  localStorage.setItem("prayerAudioEnabled", JSON.stringify(state.prayerAudio));
+}
+
+function buildSettingsDialog() {
+  elements.adhanReciterSelect.innerHTML = "";
+  for (const option of ADHAN_OPTIONS) {
+    const el = document.createElement("option");
+    el.value = option.id;
+    el.textContent = option.label;
+    elements.adhanReciterSelect.append(el);
+  }
+  elements.adhanReciterSelect.value = state.adhanId;
+
+  elements.fajrAdhanSelect.innerHTML = "";
+  for (const option of FAJR_ADHAN_OPTIONS) {
+    const el = document.createElement("option");
+    el.value = option.id;
+    el.textContent = option.label;
+    elements.fajrAdhanSelect.append(el);
+  }
+  elements.fajrAdhanSelect.value = state.fajrAdhanId;
+
+  elements.prayerToggleList.innerHTML = "";
+  for (const name of ADHAN_PRAYERS) {
+    const row = document.createElement("label");
+    row.className = "toggle-row";
+
+    const label = document.createElement("span");
+    label.textContent = name;
+
+    const switchWrap = document.createElement("span");
+    switchWrap.className = "toggle-switch";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = state.prayerAudio[name];
+    input.addEventListener("change", () => {
+      state.prayerAudio[name] = input.checked;
+      savePrayerAudioPrefs();
+    });
+
+    const track = document.createElement("span");
+    track.className = "track";
+
+    switchWrap.append(input, track);
+    row.append(label, switchWrap);
+    elements.prayerToggleList.append(row);
+  }
+}
+
 async function playAdhan(name) {
   setStatus(`Playing adhan for ${name}.`);
   try {
+    elements.audio.src = adhanUrlFor(name);
     elements.audio.currentTime = 0;
     await elements.audio.play();
   } catch {
@@ -196,8 +336,18 @@ async function playAdhan(name) {
   }
 }
 
+function adhanUrlFor(name) {
+  if (name === "Fajr") {
+    const reciter = FAJR_ADHAN_OPTIONS.find((option) => option.id === state.fajrAdhanId) || FAJR_ADHAN_OPTIONS[0];
+    return reciter.url;
+  }
+  const reciter = ADHAN_OPTIONS.find((option) => option.id === state.adhanId) || ADHAN_OPTIONS[0];
+  return `https://praytimes.org/audio/sunni/${reciter.id}.mp3`;
+}
+
 async function testAudio() {
   try {
+    elements.audio.src = adhanUrlFor("Dhuhr");
     elements.audio.volume = 0.01;
     await elements.audio.play();
     elements.audio.pause();
@@ -360,4 +510,161 @@ function degToRad(value) {
 
 function radToDeg(value) {
   return value * 180 / Math.PI;
+}
+
+function renderDuaOfDay() {
+  if (typeof AZKAR === "undefined" || !AZKAR.length) return;
+  const dayIndex = dayOfYearLocal(new Date()) % AZKAR.length;
+  const dua = AZKAR[dayIndex];
+  elements.duaCard.innerHTML = `
+    <p class="dua-arabic" lang="ar">${escapeHtml(dua.arabic)}</p>
+    <p class="dua-english">${escapeHtml(dua.english)}</p>
+    <p class="dua-reference">${escapeHtml(dua.reference)}</p>
+  `;
+}
+
+const MASJID_REFRESH_MS = 24 * 60 * 60 * 1000;
+
+async function maybeLookupMasjid(force = false) {
+  const apiKey = localStorage.getItem("claudeApiKey");
+  if (!apiKey || !state.coords) return;
+
+  const cached = JSON.parse(localStorage.getItem("masjidInfo") || "null");
+  if (!force && cached && Date.now() - cached.fetchedAt < MASJID_REFRESH_MS) {
+    renderMasjidCard();
+    return;
+  }
+
+  renderMasjidLoading();
+  try {
+    const info = await fetchMasjidInfo(apiKey, state.coords.lat, state.coords.lon);
+    localStorage.setItem("masjidInfo", JSON.stringify({ ...info, fetchedAt: Date.now() }));
+  } catch (error) {
+    renderMasjidError(error.message || "Lookup failed.");
+    return;
+  }
+  renderMasjidCard();
+}
+
+async function fetchMasjidInfo(apiKey, lat, lon) {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model: "claude-opus-4-8",
+      max_tokens: 4096,
+      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 8 }],
+      output_config: {
+        format: {
+          type: "json_schema",
+          schema: {
+            type: "object",
+            properties: {
+              found: { type: "boolean" },
+              name: { type: "string" },
+              address: { type: "string" },
+              iqama: {
+                type: "object",
+                properties: {
+                  fajr: { type: "string" },
+                  dhuhr: { type: "string" },
+                  asr: { type: "string" },
+                  maghrib: { type: "string" },
+                  isha: { type: "string" },
+                  jumuah: { type: "string" },
+                },
+                required: ["fajr", "dhuhr", "asr", "maghrib", "isha", "jumuah"],
+                additionalProperties: false,
+              },
+            },
+            required: ["found", "name", "address", "iqama"],
+            additionalProperties: false,
+          },
+        },
+      },
+      messages: [
+        {
+          role: "user",
+          content:
+            `Find the closest masjid (mosque) to latitude ${lat}, longitude ${lon}. ` +
+            "Search the web for its official website or social media page and extract its current iqama (congregation prayer) times for Fajr, Dhuhr, Asr, Maghrib, Isha, and Jumuah. " +
+            "Return the masjid's name and street address. " +
+            "If you cannot confidently find a masjid or its iqama times, set found to false and use empty strings for any field you could not determine. " +
+            "Do not fabricate times.",
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Claude API error (${response.status}): ${body.slice(0, 200)}`);
+  }
+
+  const data = await response.json();
+  if (data.stop_reason === "refusal") {
+    throw new Error("Claude declined this request.");
+  }
+  const textBlock = (data.content || []).find((block) => block.type === "text");
+  if (!textBlock) throw new Error("No response content.");
+  const parsed = JSON.parse(textBlock.text);
+  if (!parsed.found) throw new Error("Could not find a nearby masjid with iqama times.");
+  return parsed;
+}
+
+function renderMasjidLoading() {
+  elements.masjidCard.innerHTML = '<p class="masjid-empty">Looking up the nearest masjid...</p>';
+}
+
+function renderMasjidError(message) {
+  elements.masjidCard.innerHTML = `<p class="masjid-empty">${escapeHtml(message)}</p>`;
+}
+
+function renderMasjidCard() {
+  const apiKey = localStorage.getItem("claudeApiKey");
+  if (!apiKey) {
+    elements.masjidCard.innerHTML =
+      '<p class="masjid-empty">Set a Claude API key (⚙) to look up the nearest masjid and iqama times.</p>';
+    return;
+  }
+
+  const info = JSON.parse(localStorage.getItem("masjidInfo") || "null");
+  if (!info) {
+    elements.masjidCard.innerHTML = '<p class="masjid-empty">Waiting for location to look up the nearest masjid...</p>';
+    return;
+  }
+
+  const iqamaOrder = [
+    ["fajr", "Fajr"],
+    ["dhuhr", "Dhuhr"],
+    ["asr", "Asr"],
+    ["maghrib", "Maghrib"],
+    ["isha", "Isha"],
+    ["jumuah", "Jumu'ah"],
+  ];
+  const items = iqamaOrder
+    .filter(([key]) => info.iqama && info.iqama[key])
+    .map(
+      ([key, label]) =>
+        `<div class="masjid-iqama-item"><span class="name">${label}</span><span class="time">${escapeHtml(info.iqama[key])}</span></div>`,
+    )
+    .join("");
+
+  elements.masjidCard.innerHTML = `
+    <h3 class="masjid-name">${escapeHtml(info.name || "Nearby masjid")}</h3>
+    <p class="masjid-address">${escapeHtml(info.address || "")}</p>
+    <div class="masjid-iqama">${items || '<p class="masjid-empty">No iqama times found.</p>'}</div>
+    <p class="masjid-updated">Updated ${new Date(info.fetchedAt).toLocaleString()}</p>
+  `;
+}
+
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value;
+  return div.innerHTML;
 }

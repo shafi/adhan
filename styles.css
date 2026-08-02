@@ -340,6 +340,216 @@ select {
   font-variant-numeric: tabular-nums;
 }
 
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.dua-card {
+  padding: clamp(14px, 1.8vw, 20px);
+  border: 1px solid rgba(26, 33, 28, 0.1);
+  border-left: 4px solid rgba(75, 154, 123, 0.6);
+  border-radius: 3px;
+  background: rgba(255, 253, 246, 0.66);
+}
+
+.dua-arabic {
+  margin: 0 0 12px;
+  font-family: Georgia, "Traditional Arabic", "Times New Roman", serif;
+  font-size: clamp(1.3rem, 2.1vw, 1.9rem);
+  line-height: 1.9;
+  text-align: right;
+  direction: rtl;
+}
+
+.dua-english {
+  margin: 0 0 10px;
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  line-height: 1.5;
+}
+
+.dua-reference {
+  margin: 0;
+  color: #6b756f;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.masjid-card {
+  padding: clamp(14px, 1.8vw, 20px);
+  border: 1px solid rgba(26, 33, 28, 0.1);
+  border-left: 4px solid rgba(216, 180, 95, 0.55);
+  border-radius: 3px;
+  background: rgba(255, 253, 246, 0.66);
+}
+
+.masjid-empty {
+  margin: 0;
+  color: #4c5650;
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+}
+
+.masjid-name {
+  margin: 0 0 4px;
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  font-weight: 800;
+}
+
+.masjid-address {
+  margin: 0 0 14px;
+  color: #4c5650;
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+}
+
+.masjid-iqama {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.masjid-iqama-item {
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: rgba(37, 95, 104, 0.1);
+  text-align: center;
+}
+
+.masjid-iqama-item .name {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5a6560;
+}
+
+.masjid-iqama-item .time {
+  display: block;
+  margin-top: 2px;
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.masjid-updated {
+  margin: 12px 0 0;
+  color: #6b756f;
+  font-size: 0.78rem;
+}
+
+.settings-dialog {
+  width: min(440px, 92vw);
+  padding: 0;
+  border: 1px solid rgba(217, 179, 92, 0.4);
+  border-radius: 6px;
+  color: var(--ink);
+  background: #0e2c23;
+}
+
+.settings-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.settings-form {
+  display: grid;
+  gap: 20px;
+  padding: clamp(18px, 3vw, 26px);
+}
+
+.settings-form .section-heading {
+  margin-bottom: 0;
+}
+
+.settings-close {
+  width: 40px;
+  height: 40px;
+}
+
+.settings-field {
+  display: grid;
+  gap: 8px;
+}
+
+.settings-field .label {
+  margin: 0;
+}
+
+.settings-field input[type="password"],
+.settings-field select {
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: rgba(248, 244, 232, 0.08);
+}
+
+.settings-hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.toggle-list {
+  display: grid;
+  gap: 10px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(248, 244, 232, 0.05);
+}
+
+.toggle-row span {
+  font-weight: 700;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-switch .track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(248, 244, 232, 0.18);
+  transition: background-color 0.15s ease;
+}
+
+.toggle-switch .track::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  transition: transform 0.15s ease;
+}
+
+.toggle-switch input:checked + .track {
+  background: var(--accent-2);
+}
+
+.toggle-switch input:checked + .track::before {
+  transform: translateX(18px);
+}
+
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
