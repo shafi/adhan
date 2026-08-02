@@ -17,4 +17,5 @@ configMapGenerator:
       - index.html
       - styles.css
       - app.js
+      - azkar.js
       - manifest.webmanifest
