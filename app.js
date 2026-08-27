@@ -40,6 +40,21 @@ const FAJR_ADHAN_OPTIONS = [
 ];
 const DEFAULT_FAJR_ADHAN_ID = FAJR_ADHAN_OPTIONS[0].id;
 
+const HIJRI_MONTHS = [
+  "Muharram",
+  "Safar",
+  "Rabi' al-awwal",
+  "Rabi' al-thani",
+  "Jumada al-awwal",
+  "Jumada al-thani",
+  "Rajab",
+  "Sha'ban",
+  "Ramadan",
+  "Shawwal",
+  "Dhu al-Qi'dah",
+  "Dhu al-Hijjah",
+];
+
 const state = {
   coords: null,
   times: null,
@@ -498,12 +513,19 @@ function formatTime(date) {
 }
 
 function formatHijriDate(date) {
-  return new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
+  // Some Android WebViews compute the correct islamic-umalqura month/day/year
+  // numerically but mis-map the month *name* onto the Gregorian month table
+  // (e.g. showing "March" for Rabi' al-awwal, since both are month index 2).
+  // Requesting numeric fields and naming the month ourselves sidesteps that.
+  const parts = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
     weekday: "long",
-    month: "long",
+    month: "numeric",
     day: "numeric",
     year: "numeric",
-  }).format(date);
+  }).formatToParts(date);
+  const get = (type) => parts.find((part) => part.type === type)?.value;
+  const monthName = HIJRI_MONTHS[Number(get("month")) - 1] ?? get("month");
+  return `${get("weekday")}, ${monthName} ${get("day")}, ${get("year")} AH`;
 }
 
 function formatDuration(ms) {
