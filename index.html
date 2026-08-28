@@ -11,45 +11,47 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero" aria-label="Current prayer status">
-        <div class="topbar">
-          <div class="brand-block">
-            <div class="brand-mark" aria-hidden="true"><span></span></div>
-            <div>
-              <p class="label">Adhan <span class="arabic-label" lang="ar">الأذان</span></p>
-              <h1 id="locationName">Finding location...</h1>
-            </div>
-          </div>
-          <div class="topbar-actions">
-            <button id="audioButton" class="icon-button" type="button" title="Enable adhan audio" aria-label="Enable adhan audio">
-              <span aria-hidden="true">♪</span>
-            </button>
-            <button id="settingsButton" class="icon-button" type="button" title="Set Claude API key" aria-label="Set Claude API key">
-              <span aria-hidden="true">⚙</span>
-            </button>
+      <div class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true"><span></span></div>
+          <div>
+            <p class="label">Adhan <span class="arabic-label" lang="ar">الأذان</span></p>
+            <h1 id="locationName">Finding location...</h1>
           </div>
         </div>
+        <div class="topbar-actions">
+          <button id="audioButton" class="icon-button" type="button" title="Enable adhan audio" aria-label="Enable adhan audio">
+            <span aria-hidden="true">♪</span>
+          </button>
+          <button id="settingsButton" class="icon-button" type="button" title="Set Claude API key" aria-label="Set Claude API key">
+            <span aria-hidden="true">⚙</span>
+          </button>
+        </div>
+      </div>
 
-        <div class="time-grid">
-          <div>
-            <p class="label">Now</p>
-            <div id="clock" class="clock">--:--</div>
+      <section class="hero" aria-label="Current time and next prayer">
+        <div class="now-block">
+          <p class="label">Now</p>
+          <div id="clock" class="clock">--:--</div>
+          <div class="date-stack">
             <div id="date" class="date">Loading date</div>
             <div id="hijriDate" class="hijri-date">Loading Islamic date</div>
           </div>
-          <div class="next-panel">
-            <p class="label">Next Prayer</p>
-            <div id="nextPrayer" class="next-prayer">--</div>
-            <div id="countdown" class="countdown">--:--:--</div>
-          </div>
         </div>
 
-        <div id="status" class="status" role="status">Requesting browser geolocation.</div>
+        <div class="hero-divider" aria-hidden="true"><span></span></div>
+
+        <div class="next-block">
+          <p class="label">Next Prayer</p>
+          <div id="nextPrayer" class="next-prayer">--</div>
+          <div id="countdown" class="countdown">--:--:--</div>
+        </div>
       </section>
 
-      <section class="schedule" aria-label="Daily prayer schedule">
-        <div class="ornament" aria-hidden="true"><span></span></div>
-        <div class="section-heading">
+      <div id="status" class="status" role="status">Requesting browser geolocation.</div>
+
+      <section class="schedule-strip" aria-label="Daily prayer schedule">
+        <div class="strip-heading">
           <h2>Today</h2>
           <select id="methodSelect" aria-label="Calculation method">
             <option value="MWL">Muslim World League</option>
@@ -60,19 +62,19 @@
           </select>
         </div>
         <div id="prayerList" class="prayer-list"></div>
+      </section>
 
-        <div class="ornament" aria-hidden="true"><span></span></div>
-        <div class="section-heading">
+      <section class="info-row" aria-label="Dua of the day and nearby masjid">
+        <div class="info-card">
           <h2>Dua of the Day</h2>
+          <div id="duaCard" class="dua-card"></div>
         </div>
-        <div id="duaCard" class="dua-card"></div>
 
-        <div class="ornament" aria-hidden="true"><span></span></div>
-        <div class="section-heading">
+        <div class="info-card">
           <h2>Nearby Masjid</h2>
-        </div>
-        <div id="masjidCard" class="masjid-card">
-          <p class="masjid-empty">Set a Claude API key (⚙) to look up the nearest masjid and iqama times.</p>
+          <div id="masjidCard" class="masjid-card">
+            <p class="masjid-empty">Set a Claude API key (⚙) to look up the nearest masjid and iqama times.</p>
+          </div>
         </div>
       </section>
     </main>

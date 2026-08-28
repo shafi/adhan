@@ -38,38 +38,132 @@ select {
   font: inherit;
 }
 
+/* ---------- Shell: a single vertical stack, current time + countdown
+   given the lion's share of the height. Everything below is secondary. ---------- */
+
 .app-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
-  /* Capped (not auto) row height: on short/dense screens the schedule column's
-     content can be taller than the viewport. Without this, grid stretches the
-     hero column to match, and the whole page grows past the viewport with no
-     scroll affordance on a kiosk display — cutting off the masjid card and
-     even the status bar. Schedule scrolls internally instead; see below. */
-  grid-template-rows: minmax(0, 1fr);
-  gap: clamp(16px, 2.5vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.4vh, 18px);
   height: 100vh;
-  padding: clamp(16px, 2.6vw, 30px);
+  min-height: 100vh;
+  padding: clamp(12px, 1.8vh, 24px) clamp(16px, 2vw, 28px);
+  overflow: hidden;
 }
 
-.hero,
-.schedule {
-  border: 1px solid rgba(217, 179, 92, 0.4);
-  border-radius: 4px;
-  background: rgba(16, 40, 32, 0.82);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(217, 179, 92, 0.08);
+.topbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
 }
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  position: relative;
+  width: clamp(34px, 3.4vw, 46px);
+  aspect-ratio: 1;
+  rotate: 45deg;
+  border: 1px solid rgba(216, 180, 95, 0.8);
+  background: rgba(216, 180, 95, 0.08);
+  flex-shrink: 0;
+}
+
+.brand-mark::before,
+.brand-mark::after,
+.brand-mark span {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(216, 180, 95, 0.7);
+}
+
+.brand-mark::before { rotate: 30deg; }
+.brand-mark::after { rotate: 60deg; }
+
+.label {
+  margin: 0 0 2px;
+  color: var(--accent);
+  font-size: clamp(0.68rem, 0.9vw, 0.8rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.arabic-label {
+  margin-left: 0.45rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15em;
+  letter-spacing: 0;
+}
+
+h1,
+h2 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+h1 {
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(1.1rem, 1.8vw, 1.7rem);
+}
+
+h2 {
+  font-size: clamp(0.95rem, 1.3vw, 1.2rem);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: clamp(38px, 3.6vw, 48px);
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 50% 50% 8px 8px;
+  background: rgba(248, 244, 232, 0.08);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-button span {
+  font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+  line-height: 1;
+}
+
+.icon-button.enabled {
+  border-color: rgba(214, 167, 74, 0.8);
+  background: rgba(214, 167, 74, 0.18);
+}
+
+/* ---------- Hero: current time + countdown to next prayer. The whole point
+   of the display, so it gets most of the vertical space and the biggest type. ---------- */
 
 .hero {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: calc(100vh - clamp(32px, 5.2vw, 60px));
-  padding: clamp(20px, 3.3vw, 40px);
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+  border: 1px solid rgba(217, 179, 92, 0.4);
+  border-radius: 6px;
+  background: rgba(16, 40, 32, 0.82);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(217, 179, 92, 0.08);
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  container-type: inline-size;
 }
 
 .hero::before {
@@ -80,7 +174,7 @@ select {
     linear-gradient(30deg, transparent 24%, rgba(216, 180, 95, 0.07) 25%, rgba(216, 180, 95, 0.07) 26%, transparent 27%, transparent 74%, rgba(216, 180, 95, 0.07) 75%, rgba(216, 180, 95, 0.07) 76%, transparent 77%),
     linear-gradient(150deg, transparent 24%, rgba(216, 180, 95, 0.07) 25%, rgba(216, 180, 95, 0.07) 26%, transparent 27%, transparent 74%, rgba(216, 180, 95, 0.07) 75%, rgba(216, 180, 95, 0.07) 76%, transparent 77%);
   background-size: 56px 98px;
-  mask-image: linear-gradient(to bottom right, transparent 18%, #000 90%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 40%, transparent 92%);
   pointer-events: none;
   z-index: -1;
 }
@@ -94,160 +188,95 @@ select {
   z-index: -1;
 }
 
-.topbar,
-.section-heading,
-.time-grid,
-.prayer-row {
+.now-block,
+.next-block {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: clamp(10px, 2vw, 32px);
+  container-type: inline-size;
+}
+
+.hero-divider {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
+  justify-content: center;
+  width: clamp(24px, 3vw, 48px);
 }
 
-.label {
-  margin: 0 0 8px;
-  color: var(--accent);
-  font-size: clamp(0.72rem, 1vw, 0.86rem);
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.hero-divider::before {
+  content: "";
+  width: 1px;
+  height: 70%;
+  background: linear-gradient(to bottom, transparent, rgba(216, 180, 95, 0.45), transparent);
 }
 
-.arabic-label {
-  margin-left: 0.45rem;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.15em;
-  letter-spacing: 0;
-}
-
-.brand-block {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brand-mark {
-  position: relative;
-  width: clamp(42px, 5vw, 58px);
+.hero-divider span {
+  position: absolute;
+  width: 14px;
   aspect-ratio: 1;
   rotate: 45deg;
-  border: 1px solid rgba(216, 180, 95, 0.8);
-  background: rgba(216, 180, 95, 0.08);
-}
-
-.brand-mark::before,
-.brand-mark::after,
-.brand-mark span {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border: 1px solid rgba(216, 180, 95, 0.7);
-}
-
-.brand-mark::before { rotate: 30deg; }
-.brand-mark::after { rotate: 60deg; }
-
-h1,
-h2 {
-  margin: 0;
-  line-height: 1.05;
-}
-
-h1 {
-  max-width: 14ch;
-  font-size: clamp(1.8rem, 3.4vw, 4rem);
-}
-
-h2 {
-  font-size: clamp(1.35rem, 2.1vw, 2.4rem);
-}
-
-.icon-button {
-  display: grid;
-  place-items: center;
-  width: clamp(50px, 5.6vw, 68px);
-  aspect-ratio: 1;
-  border: 1px solid var(--line);
-  border-radius: 50% 50% 8px 8px;
-  background: rgba(248, 244, 232, 0.08);
-  color: var(--ink);
-  cursor: pointer;
-}
-
-.icon-button span {
-  font-size: clamp(1.55rem, 2.3vw, 2.1rem);
-  line-height: 1;
-}
-
-.icon-button.enabled {
-  border-color: rgba(214, 167, 74, 0.8);
-  background: rgba(214, 167, 74, 0.18);
-}
-
-.time-grid {
-  align-items: stretch;
-  margin: clamp(34px, 5.6vw, 72px) 0;
-  position: relative;
-  z-index: 1;
-  flex-wrap: wrap;
-  row-gap: 24px;
+  border: 2px solid rgba(216, 180, 95, 0.55);
+  background: var(--panel);
 }
 
 .clock {
   font-variant-numeric: tabular-nums;
-  /* Sized off the hero's own width (container query), not the full viewport —
-     the hero is one column of a wider grid, so vw-based sizing overflowed its
-     narrower share of the screen (e.g. wrapped and got clipped on 10" tablets). */
-  font-size: clamp(2.2rem, 9cqi, 9.4rem);
+  /* Sized off this block's own width (container query), not the viewport —
+     each hero half is roughly half the screen, so vw-based sizing overflowed
+     and wrapped (e.g. clipped on 10" tablets at ~1280px wide). cqmin also
+     guards against short/landscape-constrained heights. */
+  font-size: clamp(2.6rem, min(21cqi, 40cqb), 11rem);
   font-weight: 850;
   line-height: 0.95;
+}
+
+.date-stack {
+  margin-top: clamp(6px, 1.4cqi, 16px);
 }
 
 .date,
 .hijri-date {
   color: var(--muted);
-  font-size: clamp(0.98rem, 1.55vw, 1.4rem);
+  font-size: clamp(0.85rem, 3.6cqi, 1.3rem);
 }
 
 .hijri-date {
-  margin-top: 6px;
+  margin-top: 4px;
   color: #e5c97f;
 }
 
-.next-panel {
-  align-self: center;
-  min-width: min(280px, 36vw);
-  padding: clamp(16px, 2.4vw, 26px);
-  border: 1px solid rgba(216, 180, 95, 0.38);
-  border-top: 5px solid var(--accent);
-  border-radius: 46% 46% 3px 3px / 28px 28px 3px 3px;
-  background: linear-gradient(145deg, rgba(37, 95, 104, 0.28), rgba(0, 0, 0, 0.22));
-  text-align: center;
-}
-
 .next-prayer {
-  font-size: clamp(1.9rem, 3.8vw, 4.2rem);
-  font-weight: 850;
-  line-height: 1;
+  font-size: clamp(1.3rem, 7cqi, 2.6rem);
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.02em;
 }
 
 .countdown {
-  margin-top: 10px;
-  color: var(--muted);
-  font-size: clamp(1.35rem, 2.4vw, 2.4rem);
+  margin-top: clamp(4px, 1cqi, 10px);
   font-variant-numeric: tabular-nums;
+  font-weight: 850;
+  line-height: 0.95;
+  font-size: clamp(2.6rem, min(21cqi, 40cqb), 11rem);
 }
 
+/* ---------- Status strip ---------- */
+
 .status {
-  min-height: 48px;
-  padding: 14px 16px;
+  flex: 0 0 auto;
+  padding: clamp(8px, 1vh, 12px) 16px;
   border: 1px solid rgba(248, 244, 232, 0.14);
   border-radius: 8px;
   color: var(--muted);
   background: rgba(0, 0, 0, 0.18);
-  font-size: clamp(0.9rem, 1.15vw, 1.08rem);
-  position: relative;
-  z-index: 1;
+  font-size: clamp(0.8rem, 1vw, 0.95rem);
 }
 
 .status.error {
@@ -255,173 +284,165 @@ h2 {
   color: #ffd5ca;
 }
 
-.schedule {
-  align-self: stretch;
-  padding: clamp(18px, 3vw, 30px);
-  background:
-    linear-gradient(180deg, rgba(217, 179, 92, 0.13), transparent 28%),
-    var(--panel-2);
-  color: #1a211c;
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+/* ---------- Today's schedule: a compact strip of six pills, not a list. ---------- */
+
+.schedule-strip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.schedule::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.055;
-  background:
-    linear-gradient(45deg, var(--blue) 25%, transparent 25%) 0 0 / 32px 32px,
-    linear-gradient(-45deg, var(--blue) 25%, transparent 25%) 0 0 / 32px 32px,
-    linear-gradient(45deg, transparent 75%, var(--blue) 75%) 0 0 / 32px 32px,
-    linear-gradient(-45deg, transparent 75%, var(--blue) 75%) 0 0 / 32px 32px;
-  pointer-events: none;
-}
-
-.schedule > * {
-  position: relative;
-}
-
-.ornament {
+.strip-heading {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 18px;
 }
 
-.ornament::before,
-.ornament::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: linear-gradient(90deg, transparent, rgba(111, 77, 24, 0.65));
-}
-
-.ornament::after { transform: scaleX(-1); }
-
-.ornament span {
-  width: 18px;
-  aspect-ratio: 1;
-  rotate: 45deg;
-  border: 2px solid #9a742d;
-  box-shadow: 0 0 0 4px rgba(154, 116, 45, 0.14);
-}
-
-.section-heading {
-  margin-bottom: 18px;
+.strip-heading h2 {
+  color: var(--ink);
 }
 
 select {
-  max-width: 240px;
-  padding: 11px 12px;
-  border: 1px solid rgba(26, 33, 28, 0.22);
+  padding: 7px 10px;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  color: #1a211c;
-  background: #fffaf0;
+  color: var(--ink);
+  background: rgba(248, 244, 232, 0.08);
+  font-size: clamp(0.8rem, 0.9vw, 0.92rem);
 }
 
 .prayer-list {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(6px, 0.9vw, 12px);
 }
 
 .prayer-row {
-  min-height: clamp(58px, 7.4vh, 82px);
-  padding: 12px clamp(14px, 1.8vw, 22px);
-  border: 1px solid rgba(26, 33, 28, 0.1);
-  border-radius: 3px;
-  border-left: 4px solid rgba(37, 95, 104, 0.3);
-  background: rgba(255, 253, 246, 0.66);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: clamp(48px, 7vh, 72px);
+  padding: 8px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(248, 244, 232, 0.05);
+  text-align: center;
 }
 
 .prayer-row.active {
-  border-color: rgba(27, 112, 83, 0.75);
-  background: linear-gradient(90deg, rgba(56, 139, 107, 0.22), rgba(216, 180, 95, 0.12));
-  box-shadow: inset 0 0 0 1px rgba(216, 180, 95, 0.25);
+  border-color: var(--accent);
+  background: linear-gradient(145deg, rgba(216, 180, 95, 0.22), rgba(75, 154, 123, 0.16));
+  box-shadow: inset 0 0 0 1px rgba(216, 180, 95, 0.3);
 }
 
 .prayer-name {
-  font-size: clamp(1.15rem, 1.7vw, 1.8rem);
-  font-weight: 800;
+  color: var(--muted);
+  font-size: clamp(0.72rem, 0.95vw, 0.92rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.prayer-row.active .prayer-name {
+  color: var(--accent);
 }
 
 .prayer-time {
-  font-size: clamp(1.2rem, 1.9vw, 2rem);
+  font-size: clamp(0.92rem, 1.3vw, 1.3rem);
   font-weight: 850;
   font-variant-numeric: tabular-nums;
 }
 
-.topbar-actions {
-  display: flex;
-  gap: 10px;
+/* ---------- Secondary info: dua + masjid, side by side, scrolls internally
+   if content runs long rather than pushing the page past the viewport. ---------- */
+
+.info-row {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(10px, 1.2vw, 18px);
 }
 
-.dua-card {
-  padding: clamp(14px, 1.8vw, 20px);
-  border: 1px solid rgba(26, 33, 28, 0.1);
-  border-left: 4px solid rgba(75, 154, 123, 0.6);
-  border-radius: 3px;
-  background: rgba(255, 253, 246, 0.66);
+.info-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: clamp(10px, 1.4vh, 16px) clamp(12px, 1.4vw, 18px);
+  border: 1px solid rgba(217, 179, 92, 0.28);
+  border-radius: 8px;
+  background: rgba(247, 240, 220, 0.06);
+}
+
+.info-card h2 {
+  flex: 0 0 auto;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+
+.dua-card,
+.masjid-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(10px, 1.2vh, 14px);
+  border-radius: 6px;
+  background: rgba(255, 253, 246, 0.92);
+  color: #1a211c;
 }
 
 .dua-arabic {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-family: Georgia, "Traditional Arabic", "Times New Roman", serif;
-  font-size: clamp(1.3rem, 2.1vw, 1.9rem);
-  line-height: 1.9;
+  font-size: clamp(1.05rem, 1.3vw, 1.4rem);
+  line-height: 1.7;
   text-align: right;
   direction: rtl;
 }
 
 .dua-english {
-  margin: 0 0 10px;
-  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
-  line-height: 1.5;
+  margin: 0 0 8px;
+  font-size: clamp(0.85rem, 0.95vw, 1rem);
+  line-height: 1.45;
 }
 
 .dua-reference {
   margin: 0;
   color: #6b756f;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-style: italic;
-}
-
-.masjid-card {
-  padding: clamp(14px, 1.8vw, 20px);
-  border: 1px solid rgba(26, 33, 28, 0.1);
-  border-left: 4px solid rgba(216, 180, 95, 0.55);
-  border-radius: 3px;
-  background: rgba(255, 253, 246, 0.66);
 }
 
 .masjid-empty {
   margin: 0;
   color: #4c5650;
-  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  font-size: clamp(0.82rem, 0.95vw, 0.98rem);
 }
 
 .masjid-name {
   margin: 0 0 4px;
-  font-size: clamp(1.1rem, 1.6vw, 1.5rem);
+  font-size: clamp(0.98rem, 1.2vw, 1.2rem);
   font-weight: 800;
 }
 
 .masjid-address {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   color: #4c5650;
-  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  font-size: clamp(0.82rem, 0.95vw, 0.98rem);
 }
 
 .masjid-iqama {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+  gap: 6px;
 }
 
 .masjid-iqama-item {
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-radius: 3px;
   background: rgba(37, 95, 104, 0.1);
   text-align: center;
@@ -429,9 +450,9 @@ select {
 
 .masjid-iqama-item .name {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #5a6560;
 }
@@ -439,16 +460,19 @@ select {
 .masjid-iqama-item .time {
   display: block;
   margin-top: 2px;
-  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 
 .masjid-updated {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: #6b756f;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
 }
+
+/* ---------- Settings dialog (unchanged plain overlay, not <dialog> —
+   see CLAUDE.md) ---------- */
 
 .settings-overlay {
   position: fixed;
@@ -482,8 +506,19 @@ select {
   padding: clamp(18px, 3vw, 26px);
 }
 
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
 .settings-form .section-heading {
   margin-bottom: 0;
+}
+
+.settings-form h2 {
+  font-size: clamp(1.35rem, 2.1vw, 2.4rem);
 }
 
 .settings-close {
@@ -498,6 +533,10 @@ select {
 
 .settings-field .label {
   margin: 0;
+}
+
+.settings-field select {
+  max-width: none;
 }
 
 .settings-field input[type="password"],
@@ -576,46 +615,57 @@ select {
   transform: translateX(18px);
 }
 
-@media (max-width: 980px) {
+/* ---------- Narrow screens: stack the hero halves, let the page scroll
+   naturally instead of clipping (this is no longer a fixed-height kiosk
+   layout below this point). ---------- */
+
+@media (max-width: 700px), (max-height: 480px) {
   .app-shell {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
     height: auto;
     min-height: 100vh;
+    overflow-y: auto;
   }
 
   .hero {
-    min-height: auto;
-  }
-
-  .schedule {
-    overflow-y: visible;
-  }
-
-  .time-grid {
+    flex: 0 0 auto;
     flex-direction: column;
+    min-height: 0;
+    overflow: visible;
   }
 
-  .next-panel {
-    align-self: stretch;
-    min-width: 0;
-  }
-}
-
-@media (max-width: 620px) {
-  .topbar,
-  .section-heading,
-  .prayer-row {
-    align-items: flex-start;
-  }
-
-  .section-heading,
-  .prayer-row {
-    flex-direction: column;
-  }
-
-  select {
+  /* flex-basis:0 on these (from the row layout above) makes Chromium collapse
+     an auto-height column flex container's intrinsic size near zero, which
+     then clips the centered content inside — most visibly the "Now" label
+     at the very top. Give each block its natural content height instead. */
+  .now-block,
+  .next-block {
+    flex: 0 0 auto;
     width: 100%;
-    max-width: none;
+  }
+
+  .hero-divider {
+    width: auto;
+    height: clamp(16px, 4vh, 28px);
+  }
+
+  .hero-divider::before {
+    width: 70%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(216, 180, 95, 0.45), transparent);
+  }
+
+  .prayer-list {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 8px;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    flex: 0 0 auto;
+  }
+
+  .dua-card,
+  .masjid-card {
+    max-height: 220px;
   }
 }
