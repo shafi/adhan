@@ -215,6 +215,12 @@ function startClock() {
   setInterval(updateRuntime, 1000);
   setInterval(recalculate, 10 * 60 * 1000);
   setInterval(renderDuaOfDay, 10 * 60 * 1000);
+  setInterval(updateTimeOfDayTheme, 10 * 60 * 1000);
+}
+
+function updateTimeOfDayTheme() {
+  const hour = new Date().getHours();
+  document.documentElement.dataset.theme = hour >= 6 && hour < 19 ? "light" : "dark";
 }
 
 function updateRuntime() {

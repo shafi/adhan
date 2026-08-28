@@ -6,6 +6,10 @@
     <meta name="theme-color" content="#102820" />
     <meta name="description" content="Tablet kiosk prayer times with geolocation and adhan playback." />
     <title>Adhan</title>
+    <script>
+      document.documentElement.dataset.theme =
+        (new Date().getHours() >= 6 && new Date().getHours() < 19) ? "light" : "dark";
+    </script>
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
@@ -53,13 +57,6 @@
       <section class="schedule-strip" aria-label="Daily prayer schedule">
         <div class="strip-heading">
           <h2>Today</h2>
-          <select id="methodSelect" aria-label="Calculation method">
-            <option value="MWL">Muslim World League</option>
-            <option value="ISNA">ISNA</option>
-            <option value="Egypt">Egyptian Authority</option>
-            <option value="Makkah">Umm al-Qura, Makkah</option>
-            <option value="Karachi">Karachi</option>
-          </select>
         </div>
         <div id="prayerList" class="prayer-list"></div>
       </section>
@@ -88,6 +85,17 @@
               <span aria-hidden="true">×</span>
             </button>
           </div>
+
+          <label class="settings-field">
+            <span class="label">Calculation method</span>
+            <select id="methodSelect" aria-label="Calculation method">
+              <option value="MWL">Muslim World League</option>
+              <option value="ISNA">ISNA</option>
+              <option value="Egypt">Egyptian Authority</option>
+              <option value="Makkah">Umm al-Qura, Makkah</option>
+              <option value="Karachi">Karachi</option>
+            </select>
+          </label>
 
           <label class="settings-field">
             <span class="label">Claude API key</span>
