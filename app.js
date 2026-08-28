@@ -1,5 +1,13 @@
 const PRAYERS = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
 const ADHAN_PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+const PRAYER_ARABIC = {
+  Fajr: "الفجر",
+  Sunrise: "الشروق",
+  Dhuhr: "الظهر",
+  Asr: "العصر",
+  Maghrib: "المغرب",
+  Isha: "العشاء",
+};
 const METHODS = {
   MWL: { fajr: 18, isha: 17 },
   ISNA: { fajr: 15, isha: 15 },
@@ -75,6 +83,10 @@ const elements = {
   apiKeyInput: document.getElementById("apiKeyInput"),
   adhanReciterSelect: document.getElementById("adhanReciterSelect"),
   fajrAdhanSelect: document.getElementById("fajrAdhanSelect"),
+  adhanPreviewPlay: document.getElementById("adhanPreviewPlay"),
+  adhanPreviewStop: document.getElementById("adhanPreviewStop"),
+  fajrPreviewPlay: document.getElementById("fajrPreviewPlay"),
+  fajrPreviewStop: document.getElementById("fajrPreviewStop"),
   prayerToggleList: document.getElementById("prayerToggleList"),
   clock: document.getElementById("clock"),
   countdown: document.getElementById("countdown"),
@@ -153,6 +165,36 @@ elements.methodSelect.addEventListener("change", () => {
   localStorage.setItem("prayerMethod", state.method);
   recalculate();
 });
+
+bindAdhanPreview(elements.adhanPreviewPlay, elements.adhanPreviewStop, () => adhanUrlFor("Dhuhr"));
+bindAdhanPreview(elements.fajrPreviewPlay, elements.fajrPreviewStop, () => adhanUrlFor("Fajr"));
+
+function bindAdhanPreview(playButton, stopButton, getUrl) {
+  const stop = () => {
+    elements.audio.pause();
+    elements.audio.currentTime = 0;
+    stopButton.disabled = true;
+  };
+
+  playButton.addEventListener("click", async () => {
+    stop();
+    try {
+      elements.audio.src = getUrl();
+      elements.audio.currentTime = 0;
+      elements.audio.volume = 1;
+      stopButton.disabled = false;
+      await elements.audio.play();
+    } catch {
+      stop();
+    }
+  });
+
+  stopButton.addEventListener("click", stop);
+
+  elements.audio.addEventListener("ended", () => {
+    if (!stopButton.disabled) stop();
+  });
+}
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) {
@@ -238,7 +280,7 @@ function updateRuntime() {
 
   if (!state.times) return;
   const next = getNextPrayer(now, state.times);
-  elements.nextPrayer.textContent = next.name;
+  elements.nextPrayer.innerHTML = `${next.name} <span class="next-prayer-ar" lang="ar" dir="rtl">${PRAYER_ARABIC[next.name]}</span>`;
   elements.countdown.textContent = formatDuration(next.date - now);
   highlightActivePrayer(now);
   maybePlayAdhan(now);
@@ -253,7 +295,7 @@ function renderPrayerList() {
 
     const name = document.createElement("div");
     name.className = "prayer-name";
-    name.textContent = prayer;
+    name.innerHTML = `${prayer} <span class="prayer-name-ar" lang="ar" dir="rtl">${PRAYER_ARABIC[prayer]}</span>`;
 
     const time = document.createElement("div");
     time.className = "prayer-time";
@@ -338,7 +380,7 @@ function buildSettingsDialog() {
     row.className = "toggle-row";
 
     const label = document.createElement("span");
-    label.textContent = name;
+    label.innerHTML = `${name} <span class="prayer-name-ar" lang="ar" dir="rtl">${PRAYER_ARABIC[name]}</span>`;
 
     const switchWrap = document.createElement("span");
     switchWrap.className = "toggle-switch";

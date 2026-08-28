@@ -39,6 +39,11 @@
 
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* Naskh renders the diacritics (tashkeel) in azkar.js's du'as cleanly and
+     stays legible at small UI-label sizes — system Arabic fallbacks vary a
+     lot in quality across Android builds, so this is a real readability
+     fix, not just decoration. Falls back gracefully if it fails to load. */
+  --font-arabic: "Noto Naskh Arabic", Georgia, "Traditional Arabic", serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -187,7 +192,7 @@ select {
 
 .arabic-label {
   margin-left: 0.45rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-arabic);
   font-size: 1.15em;
   letter-spacing: 0;
 }
@@ -348,6 +353,13 @@ h2 {
   letter-spacing: 0.02em;
 }
 
+.next-prayer-ar {
+  margin-left: 0.4em;
+  font-family: var(--font-arabic);
+  font-weight: 700;
+  font-size: 0.85em;
+}
+
 .countdown {
   margin-top: clamp(4px, 1cqi, 10px);
   font-variant-numeric: tabular-nums;
@@ -440,6 +452,16 @@ select {
   color: rgb(var(--color-accent-text-rgb));
 }
 
+.prayer-name-ar {
+  display: inline-block;
+  margin-left: 0.3em;
+  font-family: var(--font-arabic);
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  font-size: 1.2em;
+}
+
 .prayer-time {
   font-size: clamp(0.92rem, 1.3vw, 1.3rem);
   font-weight: 850;
@@ -486,7 +508,7 @@ select {
 
 .dua-arabic {
   margin: 0 0 10px;
-  font-family: Georgia, "Traditional Arabic", "Times New Roman", serif;
+  font-family: var(--font-arabic);
   font-size: clamp(1.05rem, 1.3vw, 1.4rem);
   line-height: 1.7;
   text-align: right;
@@ -636,6 +658,37 @@ select {
   border-radius: 8px;
   color: rgb(var(--color-ink-rgb));
   background: rgba(var(--color-ink-rgb), 0.08);
+}
+
+.select-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.select-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid rgba(var(--color-border-rgb), var(--color-border-alpha));
+  border-radius: 8px;
+  background: rgba(var(--color-ink-rgb), 0.08);
+  color: rgb(var(--color-ink-rgb));
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.preview-button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .settings-hint {

@@ -11,6 +11,9 @@
         (new Date().getHours() >= 6 && new Date().getHours() < 19) ? "light" : "dark";
     </script>
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -105,12 +108,20 @@
 
           <label class="settings-field">
             <span class="label">Adhan reciter</span>
-            <select id="adhanReciterSelect"></select>
+            <div class="select-row">
+              <select id="adhanReciterSelect"></select>
+              <button type="button" id="adhanPreviewPlay" class="preview-button" aria-label="Preview adhan reciter">▶</button>
+              <button type="button" id="adhanPreviewStop" class="preview-button" aria-label="Stop preview" disabled>■</button>
+            </div>
           </label>
 
           <label class="settings-field">
             <span class="label">Fajr adhan</span>
-            <select id="fajrAdhanSelect"></select>
+            <div class="select-row">
+              <select id="fajrAdhanSelect"></select>
+              <button type="button" id="fajrPreviewPlay" class="preview-button" aria-label="Preview Fajr adhan">▶</button>
+              <button type="button" id="fajrPreviewStop" class="preview-button" aria-label="Stop preview" disabled>■</button>
+            </div>
           </label>
 
           <div class="settings-field">
