@@ -37,6 +37,7 @@ const ADHAN_OPTIONS = [
   { id: "Yusuf-Islam", label: "Yusuf Islam" },
 ];
 const DEFAULT_ADHAN_ID = "Adhan-Madinah";
+const RANDOM_ADHAN_ID = "random";
 
 // Fajr has its own, separate dropdown (currently a single option).
 const FAJR_ADHAN_OPTIONS = [
@@ -357,6 +358,10 @@ function savePrayerAudioPrefs() {
 
 function buildSettingsDialog() {
   elements.adhanReciterSelect.innerHTML = "";
+  const randomOption = document.createElement("option");
+  randomOption.value = RANDOM_ADHAN_ID;
+  randomOption.textContent = "Random";
+  elements.adhanReciterSelect.append(randomOption);
   for (const option of ADHAN_OPTIONS) {
     const el = document.createElement("option");
     el.value = option.id;
@@ -418,7 +423,11 @@ function adhanUrlFor(name) {
     const reciter = FAJR_ADHAN_OPTIONS.find((option) => option.id === state.fajrAdhanId) || FAJR_ADHAN_OPTIONS[0];
     return reciter.url;
   }
-  const reciter = ADHAN_OPTIONS.find((option) => option.id === state.adhanId) || ADHAN_OPTIONS[0];
+  const id =
+    state.adhanId === RANDOM_ADHAN_ID
+      ? ADHAN_OPTIONS[Math.floor(Math.random() * ADHAN_OPTIONS.length)].id
+      : state.adhanId;
+  const reciter = ADHAN_OPTIONS.find((option) => option.id === id) || ADHAN_OPTIONS[0];
   return `https://praytimes.org/audio/sunni/${reciter.id}.mp3`;
 }
 
