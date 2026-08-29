@@ -99,6 +99,8 @@ const elements = {
   prayerList: document.getElementById("prayerList"),
   status: document.getElementById("status"),
   masjidCard: document.getElementById("masjidCard"),
+  masjidInfoCard: document.getElementById("masjidInfoCard"),
+  infoRow: document.getElementById("infoRow"),
   duaCard: document.getElementById("duaCard"),
 };
 
@@ -720,6 +722,12 @@ function renderMasjidError(message) {
 
 function renderMasjidCard() {
   const apiKey = localStorage.getItem("claudeApiKey");
+
+  // No API key => no iqama lookup possible. Hide the masjid card entirely and
+  // let the dua of the day expand to fill the row so it is actually readable.
+  elements.masjidInfoCard.hidden = !apiKey;
+  elements.infoRow.classList.toggle("dua-only", !apiKey);
+
   if (!apiKey) {
     elements.masjidCard.innerHTML =
       '<p class="masjid-empty">Set a Claude API key (⚙) to look up the nearest masjid and iqama times.</p>';

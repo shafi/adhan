@@ -479,6 +479,28 @@ select {
   gap: clamp(10px, 1.2vw, 18px);
 }
 
+/* No Claude API key: masjid card is hidden, dua takes the whole row and
+   scales its text up so it can be read across the room. */
+.info-row.dua-only {
+  grid-template-columns: 1fr;
+}
+
+.info-row.dua-only .dua-arabic {
+  font-size: clamp(1.5rem, 2.6vw, 2.6rem);
+  line-height: 1.9;
+  margin-bottom: clamp(14px, 2vh, 24px);
+}
+
+.info-row.dua-only .dua-english {
+  font-size: clamp(1.05rem, 1.6vw, 1.6rem);
+  line-height: 1.6;
+  margin-bottom: clamp(10px, 1.4vh, 16px);
+}
+
+.info-row.dua-only .dua-reference {
+  font-size: clamp(0.85rem, 1vw, 1.05rem);
+}
+
 .info-card {
   display: flex;
   flex-direction: column;
