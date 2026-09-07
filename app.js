@@ -64,6 +64,20 @@ const HIJRI_MONTHS = [
   "Dhu al-Hijjah",
 ];
 
+// Major Islamic occasions, anchored to a Hijri month (1-12) + day. The next
+// occurrence of each is found by scanning forward day-by-day with the same
+// islamic-umalqura calendar the header uses (see computeUpcomingEvents).
+const ISLAMIC_EVENTS = [
+  { month: 1, day: 1, name: "Islamic New Year", arabic: "رأس السنة الهجرية" },
+  { month: 1, day: 10, name: "Day of Ashura", arabic: "عاشوراء" },
+  { month: 7, day: 27, name: "Isra & Mi'raj", arabic: "الإسراء والمعراج" },
+  { month: 9, day: 1, name: "Ramadan begins", arabic: "رمضان" },
+  { month: 10, day: 1, name: "Eid al-Fitr", arabic: "عيد الفطر" },
+  { month: 12, day: 8, name: "Hajj begins", arabic: "الحج" },
+  { month: 12, day: 9, name: "Day of Arafah", arabic: "يوم عرفة" },
+  { month: 12, day: 10, name: "Eid al-Adha", arabic: "عيد الأضحى" },
+];
+
 const state = {
   coords: null,
   times: null,
@@ -102,6 +116,7 @@ const elements = {
   masjidInfoCard: document.getElementById("masjidInfoCard"),
   infoRow: document.getElementById("infoRow"),
   duaCard: document.getElementById("duaCard"),
+  upcomingList: document.getElementById("upcomingList"),
 };
 
 elements.methodSelect.value = state.method;
@@ -112,6 +127,7 @@ requestWakeLock();
 locate();
 renderMasjidCard();
 renderDuaOfDay();
+renderUpcomingEvents();
 
 elements.audioButton.addEventListener("click", async () => {
   state.audioEnabled = true;
@@ -260,6 +276,7 @@ function startClock() {
   setInterval(updateRuntime, 1000);
   setInterval(recalculate, 10 * 60 * 1000);
   setInterval(renderDuaOfDay, 10 * 60 * 1000);
+  setInterval(renderUpcomingEvents, 10 * 60 * 1000);
   setInterval(updateTimeOfDayTheme, 10 * 60 * 1000);
 }
 
@@ -616,6 +633,69 @@ function renderDuaOfDay() {
     <p class="dua-english">${escapeHtml(dua.english)}</p>
     <p class="dua-reference">${escapeHtml(dua.reference)}</p>
   `;
+}
+
+// Walk forward one local day at a time from midnight today, converting each day
+// to the umm-al-qura calendar, and record the first date that lands on each
+// event's (Hijri month, day). The loop offset is, by construction, the whole
+// number of days until that date. Cheap enough (<= ~400 iterations) to just
+// re-run on every refresh tick.
+function computeUpcomingEvents(now, count = 3) {
+  const hijriFmt = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+  });
+  const gregFmt = new Intl.DateTimeFormat([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const found = [];
+  const seen = new Set();
+  for (let offset = 0; offset < 400 && found.length < ISLAMIC_EVENTS.length; offset++) {
+    const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + offset);
+    const parts = hijriFmt.formatToParts(date);
+    const get = (type) => parts.find((part) => part.type === type)?.value;
+    const hMonth = Number(get("month"));
+    const hDay = Number(get("day"));
+    for (const event of ISLAMIC_EVENTS) {
+      const key = `${event.month}-${event.day}`;
+      if (seen.has(key) || event.month !== hMonth || event.day !== hDay) continue;
+      seen.add(key);
+      found.push({
+        name: event.name,
+        arabic: event.arabic,
+        hijri: `${hDay} ${HIJRI_MONTHS[hMonth - 1]} ${get("year")}`,
+        gregorian: gregFmt.format(date),
+        daysUntil: offset,
+      });
+    }
+  }
+  found.sort((a, b) => a.daysUntil - b.daysUntil);
+  return found.slice(0, count);
+}
+
+function renderUpcomingEvents() {
+  const events = computeUpcomingEvents(new Date());
+  elements.upcomingList.innerHTML = events
+    .map((event) => {
+      const countdown =
+        event.daysUntil === 0
+          ? "Today"
+          : `in ${event.daysUntil} day${event.daysUntil === 1 ? "" : "s"}`;
+      return `
+        <div class="upcoming-card${event.daysUntil === 0 ? " active" : ""}">
+          <span class="upcoming-name">${escapeHtml(event.name)}
+            <span class="upcoming-name-ar" lang="ar" dir="rtl">${escapeHtml(event.arabic)}</span></span>
+          <span class="upcoming-hijri">${escapeHtml(event.hijri)}</span>
+          <span class="upcoming-greg">${escapeHtml(event.gregorian)}</span>
+          <span class="upcoming-countdown">${countdown}</span>
+        </div>`;
+    })
+    .join("");
 }
 
 const MASJID_REFRESH_MS = 24 * 60 * 60 * 1000;
