@@ -38,9 +38,11 @@ There is no linter, formatter, or test runner configured. Use `node --check <fil
 
 **Prayer time calculation is done entirely on-device** (`calculatePrayerTimes` and its helpers in `app.js`) from raw lat/lon + a calculation-method angle table (`METHODS`) — no external prayer-times API is called. Only reverse-geocoding (place name display, via Nominatim) and the masjid lookup call external services.
 
-**State persistence is `localStorage`-only** — there is no backend and no database. Keys in use: `adhanAudioEnabled`, `prayerMethod`, `adhanReciter`, `fajrAdhanReciter`, `prayerAudioEnabled`, `playedAdhans`, `claudeApiKey`, `masjidInfo`.
+**State persistence is `localStorage`-only** — there is no backend and no database. Keys in use: `adhanAudioEnabled`, `prayerMethod`, `adhanReciter`, `fajrAdhanReciter`, `prayerAudioEnabled`, `playedAdhans`, `claudeApiKey`, `masjidInfo`, `showDuaOfDay`, `showUpcomingDates`.
 
 **The settings panel (`#settingsOverlay`) is a plain hidden `<div>`, not a native `<dialog>`.** It was deliberately built this way after `<dialog>`/`showModal()` proved unreliable on the target kiosk browsers (see `closeSettings()` in `app.js`). Don't reintroduce `<dialog>` for modal UI in this app.
+
+**Dua of the Day and Upcoming Islamic Dates are opt-in**, off by default, toggled in Settings (`showDuaToggle`/`showUpcomingToggle` → `state.showDua`/`state.showUpcoming`). `updateInfoRowVisibility()` in `app.js` reconciles the Dua/Masjid row against both that setting and whether a masjid lookup is even possible (API key set): whichever single card is left gets a `dua-only`/`masjid-only` class that scales its text up, and if neither is showing the row (`#infoRow`) hides entirely. Because several containers here set their own `display` (flex/grid) at the same specificity as the browser's default `[hidden] { display: none }` rule, a bare `el.hidden = true` on them would silently stay visible (author origin beats user-agent origin on a specificity tie) — `styles.css` has a global `[hidden] { display: none !important; }` reset to guarantee `.hidden` actually hides. Keep relying on `el.hidden`, not a manual `style.display`, and don't remove that reset.
 
 **Nearby-masjid lookup** (`fetchMasjidInfo` in `app.js`) calls the Anthropic Messages API directly from the browser (`anthropic-dangerous-direct-browser-access` header) using the web search tool and a JSON-schema structured output, with the user-supplied API key read from `localStorage`. Results are cached in `localStorage` and refreshed once per 24h (`MASJID_REFRESH_MS`).
 

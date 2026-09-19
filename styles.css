@@ -132,6 +132,14 @@ select {
   font: inherit;
 }
 
+/* Several elements below set their own `display` (flex/grid) at equal
+   specificity to the UA stylesheet's `[hidden] { display: none }`, which
+   would otherwise let author styles win the tie and leave a "hidden"
+   element visible. Force the attribute to always win. */
+[hidden] {
+  display: none !important;
+}
+
 /* ---------- Shell: a single vertical stack, current time + countdown
    given the lion's share of the height. Everything below is secondary. ---------- */
 
@@ -346,8 +354,18 @@ h2 {
   color: rgb(var(--color-accent-text-rgb));
 }
 
+/* Mirrors .clock: the big number in each hero half, same row. */
+.countdown {
+  font-variant-numeric: tabular-nums;
+  font-weight: 850;
+  line-height: 0.95;
+  font-size: clamp(2.6rem, min(21cqi, 40cqb), 11rem);
+}
+
+/* Mirrors .date-stack: the smaller caption line under the big number. */
 .next-prayer {
-  font-size: clamp(1.3rem, 7cqi, 2.6rem);
+  margin-top: clamp(6px, 1.4cqi, 16px);
+  font-size: clamp(1rem, 4.2cqi, 1.9rem);
   font-weight: 800;
   color: rgb(var(--color-accent-text-rgb));
   letter-spacing: 0.02em;
@@ -358,14 +376,6 @@ h2 {
   font-family: var(--font-arabic);
   font-weight: 700;
   font-size: 0.85em;
-}
-
-.countdown {
-  margin-top: clamp(4px, 1cqi, 10px);
-  font-variant-numeric: tabular-nums;
-  font-weight: 850;
-  line-height: 0.95;
-  font-size: clamp(2.6rem, min(21cqi, 40cqb), 11rem);
 }
 
 /* ---------- Status strip ---------- */
@@ -580,6 +590,33 @@ select {
 }
 
 .info-row.dua-only .dua-reference {
+  font-size: clamp(0.85rem, 1vw, 1.05rem);
+}
+
+/* Dua hidden (Settings) but a masjid lookup is available: mirror the
+   dua-only treatment so the masjid card fills the row and scales up. */
+.info-row.masjid-only {
+  grid-template-columns: 1fr;
+}
+
+.info-row.masjid-only .masjid-name {
+  font-size: clamp(1.3rem, 2.4vw, 2.2rem);
+}
+
+.info-row.masjid-only .masjid-address {
+  font-size: clamp(1rem, 1.5vw, 1.4rem);
+  margin-bottom: clamp(14px, 2vh, 24px);
+}
+
+.info-row.masjid-only .masjid-iqama-item .name {
+  font-size: clamp(0.72rem, 0.9vw, 0.9rem);
+}
+
+.info-row.masjid-only .masjid-iqama-item .time {
+  font-size: clamp(1.15rem, 1.8vw, 1.7rem);
+}
+
+.info-row.masjid-only .masjid-updated {
   font-size: clamp(0.85rem, 1vw, 1.05rem);
 }
 

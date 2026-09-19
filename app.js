@@ -87,6 +87,10 @@ const state = {
   fajrAdhanId: localStorage.getItem("fajrAdhanReciter") || DEFAULT_FAJR_ADHAN_ID,
   prayerAudio: loadPrayerAudioPrefs(),
   playedKeys: new Set(JSON.parse(localStorage.getItem("playedAdhans") || "[]")),
+  // Off by default: the kiosk screen is small, so dua + upcoming dates only
+  // show once someone opts in via Settings.
+  showDua: localStorage.getItem("showDuaOfDay") === "true",
+  showUpcoming: localStorage.getItem("showUpcomingDates") === "true",
 };
 
 const elements = {
@@ -114,20 +118,39 @@ const elements = {
   status: document.getElementById("status"),
   masjidCard: document.getElementById("masjidCard"),
   masjidInfoCard: document.getElementById("masjidInfoCard"),
+  duaInfoCard: document.getElementById("duaInfoCard"),
   infoRow: document.getElementById("infoRow"),
   duaCard: document.getElementById("duaCard"),
+  upcomingStrip: document.getElementById("upcomingStrip"),
   upcomingList: document.getElementById("upcomingList"),
+  showDuaToggle: document.getElementById("showDuaToggle"),
+  showUpcomingToggle: document.getElementById("showUpcomingToggle"),
 };
 
 elements.methodSelect.value = state.method;
+elements.showDuaToggle.checked = state.showDua;
+elements.showUpcomingToggle.checked = state.showUpcoming;
 updateAudioButton();
 buildSettingsDialog();
 startClock();
 requestWakeLock();
 locate();
 renderMasjidCard();
+elements.upcomingStrip.hidden = !state.showUpcoming;
 renderDuaOfDay();
 renderUpcomingEvents();
+
+elements.showDuaToggle.addEventListener("change", () => {
+  state.showDua = elements.showDuaToggle.checked;
+  localStorage.setItem("showDuaOfDay", state.showDua ? "true" : "false");
+  updateInfoRowVisibility();
+});
+
+elements.showUpcomingToggle.addEventListener("change", () => {
+  state.showUpcoming = elements.showUpcomingToggle.checked;
+  localStorage.setItem("showUpcomingDates", state.showUpcoming ? "true" : "false");
+  elements.upcomingStrip.hidden = !state.showUpcoming;
+});
 
 elements.audioButton.addEventListener("click", async () => {
   state.audioEnabled = true;
@@ -800,13 +823,23 @@ function renderMasjidError(message) {
   elements.masjidCard.innerHTML = `<p class="masjid-empty">${escapeHtml(message)}</p>`;
 }
 
+// Reconciles the Dua/Masjid row against both the "show dua" setting and
+// whether a masjid lookup is even possible (API key set). Whichever single
+// card remains gets a *-only class that scales its text up to fill the row;
+// if neither is showing, the whole row collapses out of the layout.
+function updateInfoRowVisibility() {
+  const showMasjid = !!localStorage.getItem("claudeApiKey");
+  const showDua = state.showDua;
+  elements.duaInfoCard.hidden = !showDua;
+  elements.masjidInfoCard.hidden = !showMasjid;
+  elements.infoRow.hidden = !showDua && !showMasjid;
+  elements.infoRow.classList.toggle("dua-only", showDua && !showMasjid);
+  elements.infoRow.classList.toggle("masjid-only", showMasjid && !showDua);
+}
+
 function renderMasjidCard() {
   const apiKey = localStorage.getItem("claudeApiKey");
-
-  // No API key => no iqama lookup possible. Hide the masjid card entirely and
-  // let the dua of the day expand to fill the row so it is actually readable.
-  elements.masjidInfoCard.hidden = !apiKey;
-  elements.infoRow.classList.toggle("dua-only", !apiKey);
+  updateInfoRowVisibility();
 
   if (!apiKey) {
     elements.masjidCard.innerHTML =

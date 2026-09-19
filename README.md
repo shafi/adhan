@@ -13,8 +13,8 @@ Static tablet kiosk web app for Islamic prayer times.
 - Shows each prayer's Arabic name next to the English, set in Noto Naskh Arabic.
 - Plays a selectable adhan recording at Fajr, Dhuhr, Asr, Maghrib, and Isha when audio is enabled, with per-prayer on/off toggles and a play/stop preview button for each reciter in Settings.
 - Falls back to browser speech synthesis if the remote adhan audio is unavailable.
-- Rotates a "Dua of the Day" from a built-in collection of 100 short azkar/duas (Arabic with diacritics + English translation).
-- Shows the next three major Islamic occasions (Ramadan, the two Eids, Hajj/Arafah, Muharram/Ashura, Isra & Mi'raj, Islamic New Year) with Hijri date, Gregorian date, and a day countdown — computed on-device from the Umm al-Qura calendar.
+- Rotates a "Dua of the Day" from a built-in collection of 100 short azkar/duas (Arabic with diacritics + English translation). Off the screen by default — enable it in Settings.
+- Shows the next three major Islamic occasions (Ramadan, the two Eids, Hajj/Arafah, Muharram/Ashura, Isra & Mi'raj, Islamic New Year) with Hijri date, Gregorian date, and a day countdown — computed on-device from the Umm al-Qura calendar. Also off by default; enable it in Settings.
 - Looks up the closest masjid to your location and its iqama times using the Claude API (with web search), refreshed daily.
 - Stores all preferences (calculation method, reciters, audio toggles, API key) in `localStorage` — no backend, no database.
 
@@ -35,7 +35,7 @@ docker run --rm -p 8080:80 adhan
 
 ## Settings
 
-Tap ⚙ to open Settings, where you can change the prayer-time calculation method, choose from 17 Sunni adhan recordings (from [praytimes.org](https://praytimes.org/docs/adhan)), preview any reciter with the ▶/■ buttons next to each dropdown, toggle which of the five daily prayers play an adhan, and set a Claude API key for the nearby-masjid lookup. Browser autoplay policies require tapping the ♪ audio button once after the kiosk page loads before any adhan can play automatically.
+Tap ⚙ to open Settings, where you can change the prayer-time calculation method, choose from 17 Sunni adhan recordings (from [praytimes.org](https://praytimes.org/docs/adhan)), preview any reciter with the ▶/■ buttons next to each dropdown, toggle which of the five daily prayers play an adhan, set a Claude API key for the nearby-masjid lookup, and show or hide the Dua of the Day and Upcoming Islamic Dates sections (both off by default, to keep the main screen focused on the clock and countdown). Browser autoplay policies require tapping the ♪ audio button once after the kiosk page loads before any adhan can play automatically.
 
 ## Dua of the day
 

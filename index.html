@@ -50,8 +50,8 @@
 
         <div class="next-block">
           <p class="label">Next Prayer</p>
-          <div id="nextPrayer" class="next-prayer">--</div>
           <div id="countdown" class="countdown">--:--:--</div>
+          <div id="nextPrayer" class="next-prayer">--</div>
         </div>
       </section>
 
@@ -64,7 +64,7 @@
         <div id="prayerList" class="prayer-list"></div>
       </section>
 
-      <section class="upcoming-strip" aria-label="Upcoming Islamic dates">
+      <section id="upcomingStrip" class="upcoming-strip" aria-label="Upcoming Islamic dates">
         <div class="strip-heading">
           <h2>Upcoming <span class="arabic-label" lang="ar" dir="rtl">مناسبات قادمة</span></h2>
         </div>
@@ -73,7 +73,7 @@
       </section>
 
       <section id="infoRow" class="info-row" aria-label="Dua of the day and nearby masjid">
-        <div class="info-card">
+        <div id="duaInfoCard" class="info-card">
           <h2>Dua of the Day</h2>
           <div id="duaCard" class="dua-card"></div>
         </div>
@@ -135,6 +135,27 @@
           <div class="settings-field">
             <span class="label">Play adhan for</span>
             <div id="prayerToggleList" class="toggle-list"></div>
+          </div>
+
+          <div class="settings-field">
+            <span class="label">Show on screen</span>
+            <div class="toggle-list">
+              <label class="toggle-row">
+                <span>Dua of the Day</span>
+                <span class="toggle-switch">
+                  <input id="showDuaToggle" type="checkbox" />
+                  <span class="track"></span>
+                </span>
+              </label>
+              <label class="toggle-row">
+                <span>Upcoming Islamic Dates</span>
+                <span class="toggle-switch">
+                  <input id="showUpcomingToggle" type="checkbox" />
+                  <span class="track"></span>
+                </span>
+              </label>
+            </div>
+            <span class="settings-hint">Hidden sections free up space for a bigger clock and countdown.</span>
           </div>
         </div>
       </div>
