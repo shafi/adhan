@@ -16,7 +16,8 @@ Static tablet kiosk web app for Islamic prayer times.
 - Rotates a "Dua of the Day" from a built-in collection of 100 short azkar/duas (Arabic with diacritics + English translation). Off the screen by default — enable it in Settings.
 - Shows the next three major Islamic occasions (Ramadan, the two Eids, Hajj/Arafah, Muharram/Ashura, Isra & Mi'raj, Islamic New Year) with Hijri date, Gregorian date, and a day countdown — computed on-device from the Umm al-Qura calendar. Also off by default; enable it in Settings.
 - Looks up the closest masjid to your location and its iqama times using the Claude API (with web search), refreshed daily.
-- Stores all preferences (calculation method, reciters, audio toggles, API key) in `localStorage` — no backend, no database.
+- Stores all preferences (calculation method, reciters, audio toggles, API key) in `localStorage` — no database.
+- Optional "Random from YouTube" adhan: a small yt-dlp service (`yt/server.py`) picks a random popular adhan video and plays its audio, with a separate pool of Fajr adhans.
 
 ## Local run
 
@@ -44,6 +45,19 @@ Tap ⚙ to open Settings, where you can change the prayer-time calculation metho
 ## Nearby masjid lookup
 
 In Settings, enter a Claude API key (stored only in `localStorage`, never sent anywhere but `api.anthropic.com`). Once set and geolocation succeeds, the app asks Claude (with web search) to find the closest masjid and its iqama times, caching the result and refreshing once every 24 hours.
+
+## YouTube adhan service
+
+Choosing **Random from YouTube** in either reciter dropdown plays a random popular adhan from YouTube instead of a fixed recording. `yt/server.py` (standard-library Python plus [yt-dlp](https://github.com/yt-dlp/yt-dlp)) searches YouTube once a day, keeps 8 audio-only downloads per pool (videos 1–10 minutes long with ≥250k views, minus live streams, hour-long loops, compilations and similar), and serves them at `/yt/`. Fajr has its own pool. If the service is unavailable, the default reciter plays instead. `GET /yt/status` lists what's currently in each pool.
+
+Run everything locally:
+
+```sh
+python3 -m venv .venv && .venv/bin/pip install "yt-dlp[default]" deno
+STATIC_DIR=. DATA_DIR=/tmp/adhan-yt .venv/bin/python yt/server.py   # http://localhost:8080
+```
+
+In k8s it's the `adhan-yt` Deployment and Service (`k8s/yt-*.yaml`), routed at `/yt`. Tunables, as env vars: `POOL_SIZE`, `MIN_VIEWS`, `REFRESH_HOURS`.
 
 ## Android app
 

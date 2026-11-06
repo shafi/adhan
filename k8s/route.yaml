@@ -9,6 +9,14 @@ spec:
   hostnames:
     - "adhan.shafi.org"
   rules:
+    # /yt/* goes to the random-YouTube-adhan service (yt/server.py).
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /yt
+      backendRefs:
+        - name: adhan-yt
+          port: 80
     - matches:
         - path:
             type: PathPrefix

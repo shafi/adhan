@@ -38,6 +38,10 @@ const ADHAN_OPTIONS = [
 ];
 const DEFAULT_ADHAN_ID = "Adhan-Madinah";
 const RANDOM_ADHAN_ID = "random";
+// Plays a random popular adhan video's audio, picked server-side by the yt/
+// service (yt-dlp) at /yt/ on this host. Offered in both dropdowns; Fajr
+// draws from a separate pool of Fajr adhans.
+const YOUTUBE_ADHAN_ID = "youtube";
 
 // Fajr has its own, separate dropdown (currently a single option).
 const FAJR_ADHAN_OPTIONS = [
@@ -214,8 +218,8 @@ elements.methodSelect.addEventListener("change", () => {
   recalculate();
 });
 
-bindAdhanPreview(elements.adhanPreviewPlay, elements.adhanPreviewStop, () => adhanUrlFor("Dhuhr"));
-bindAdhanPreview(elements.fajrPreviewPlay, elements.fajrPreviewStop, () => adhanUrlFor("Fajr"));
+bindAdhanPreview(elements.adhanPreviewPlay, elements.adhanPreviewStop, async () => (await resolveAdhan("Dhuhr")).url);
+bindAdhanPreview(elements.fajrPreviewPlay, elements.fajrPreviewStop, async () => (await resolveAdhan("Fajr")).url);
 
 function bindAdhanPreview(playButton, stopButton, getUrl) {
   const stop = () => {
@@ -227,7 +231,7 @@ function bindAdhanPreview(playButton, stopButton, getUrl) {
   playButton.addEventListener("click", async () => {
     stop();
     try {
-      elements.audio.src = getUrl();
+      elements.audio.src = await getUrl();
       elements.audio.currentTime = 0;
       elements.audio.volume = 1;
       stopButton.disabled = false;
@@ -409,7 +413,7 @@ function buildSettingsDialog() {
   const randomOption = document.createElement("option");
   randomOption.value = RANDOM_ADHAN_ID;
   randomOption.textContent = "Random";
-  elements.adhanReciterSelect.append(randomOption);
+  elements.adhanReciterSelect.append(randomOption, youtubeOption());
   for (const option of ADHAN_OPTIONS) {
     const el = document.createElement("option");
     el.value = option.id;
@@ -425,6 +429,7 @@ function buildSettingsDialog() {
     el.textContent = option.label;
     elements.fajrAdhanSelect.append(el);
   }
+  elements.fajrAdhanSelect.append(youtubeOption());
   elements.fajrAdhanSelect.value = state.fajrAdhanId;
 
   elements.prayerToggleList.innerHTML = "";
@@ -455,17 +460,45 @@ function buildSettingsDialog() {
   }
 }
 
+function youtubeOption() {
+  const el = document.createElement("option");
+  el.value = YOUTUBE_ADHAN_ID;
+  el.textContent = "Random from YouTube";
+  return el;
+}
+
 async function playAdhan(name) {
-  setStatus(`Playing adhan for ${name}.`);
+  const { url, title } = await resolveAdhan(name);
+  // A YouTube pick that fails to load falls back to the default reciter.
+  for (const src of new Set([url, adhanUrlFor(name)])) {
+    try {
+      elements.audio.src = src;
+      elements.audio.currentTime = 0;
+      await elements.audio.play();
+      setStatus(title && src === url ? `Playing adhan for ${name}: ${title}` : `Playing adhan for ${name}.`);
+      return;
+    } catch {
+      // Try the next source.
+    }
+  }
+  speakAdhan();
+}
+
+async function resolveAdhan(name) {
+  const selected = name === "Fajr" ? state.fajrAdhanId : state.adhanId;
+  if (selected !== YOUTUBE_ADHAN_ID) return { url: adhanUrlFor(name) };
   try {
-    elements.audio.src = adhanUrlFor(name);
-    elements.audio.currentTime = 0;
-    await elements.audio.play();
+    const response = await fetch(`/yt/pick?kind=${name === "Fajr" ? "fajr" : "adhan"}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`YouTube adhan pick failed: ${response.status}`);
+    const pick = await response.json();
+    return { url: pick.url, title: pick.title };
   } catch {
-    speakAdhan();
+    return { url: adhanUrlFor(name) };
   }
 }
 
+// Direct recording URL for the selected reciter; the YouTube option (which
+// needs resolveAdhan) falls through to the default reciter here.
 function adhanUrlFor(name) {
   if (name === "Fajr") {
     const reciter = FAJR_ADHAN_OPTIONS.find((option) => option.id === state.fajrAdhanId) || FAJR_ADHAN_OPTIONS[0];
@@ -475,7 +508,8 @@ function adhanUrlFor(name) {
     state.adhanId === RANDOM_ADHAN_ID
       ? ADHAN_OPTIONS[Math.floor(Math.random() * ADHAN_OPTIONS.length)].id
       : state.adhanId;
-  const reciter = ADHAN_OPTIONS.find((option) => option.id === id) || ADHAN_OPTIONS[0];
+  const reciter =
+    ADHAN_OPTIONS.find((option) => option.id === id) || ADHAN_OPTIONS.find((option) => option.id === DEFAULT_ADHAN_ID);
   return `https://praytimes.org/audio/sunni/${reciter.id}.mp3`;
 }
 

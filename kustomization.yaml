@@ -7,15 +7,22 @@ resources:
   - k8s/deployment.yaml
   - k8s/service.yaml
   - k8s/route.yaml
-
-generatorOptions:
-  disableNameSuffixHash: true
+  - k8s/yt-deployment.yaml
+  - k8s/yt-service.yaml
 
 configMapGenerator:
+  # Unhashed: nginx serves updated files in place without a pod restart.
   - name: adhan-web
+    options:
+      disableNameSuffixHash: true
     files:
       - index.html
       - styles.css
       - app.js
       - azkar.js
       - manifest.webmanifest
+  # Hashed name so a server.py change rolls the yt pod: a running Python
+  # process doesn't pick up an updated file the way nginx does.
+  - name: adhan-yt
+    files:
+      - yt/server.py

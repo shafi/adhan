@@ -1,0 +1,97 @@
+# Random-YouTube-adhan service (yt/server.py). Runs on a stock python image
+# with the script from the adhan-yt ConfigMap; yt-dlp and deno are installed
+# into a venv at startup (and upgraded daily by the script itself), so there
+# is no custom image to build or keep current.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adhan-yt
+  labels:
+    app.kubernetes.io/name: adhan-yt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: adhan-yt
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: adhan-yt
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: yt
+          image: python:3.13-slim
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
+            - >-
+              python -m venv /venv &&
+              /venv/bin/pip install -q --no-cache-dir "yt-dlp[default]" deno &&
+              exec /venv/bin/python -u /app/server.py
+          env:
+            - name: DATA_DIR
+              value: /data
+            - name: HOME
+              value: /tmp
+            - name: XDG_CACHE_HOME
+              value: /data/.cache
+            - name: DENO_DIR
+              value: /data/.deno
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /yt/healthz
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /yt/healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /yt/healthz
+              port: http
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: app
+              mountPath: /app
+              readOnly: true
+            - name: venv
+              mountPath: /venv
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: app
+          configMap:
+            name: adhan-yt
+        - name: venv
+          emptyDir: {}
+        - name: data
+          emptyDir:
+            sizeLimit: 500Mi
+        - name: tmp
+          emptyDir: {}
