@@ -48,6 +48,10 @@ There is no linter, formatter, or test runner configured. Use `node --check <fil
 
 **Dua of the day** picks `AZKAR[dayOfYearLocal(now) % AZKAR.length]` — deterministic per calendar day, no random selection, re-checked every 10 minutes so it rolls over at local midnight without a page reload.
 
+## Android app
+
+`android/` + `capacitor.config.json` + `package.json` are a Capacitor shell (sideloaded, not Play Store) that **loads the live site via `server.url`** rather than bundling the web files — deliberately, so the Android app and webapp stay feature-identical. Don't switch it to a bundled `www/` copy. Android-only behavior goes in `app.js` behind the `nativeApp` guard (`window.Capacitor?.isNativePlatform?.()`), calling plugins through the bridge's `Capacitor.nativePromise(plugin, method, opts)` / `Capacitor.addListener(...)` — no imports, since `@capacitor/core` is never loaded on the page. Currently that's background adhan: on the `App` `pause` event `scheduleNativeAdhans()` schedules `LocalNotifications` for 7 days (channel sounds are `res/raw/adhan*.mp3`), and `resume` cancels them so in-app playback doesn't double up. Kiosk tweaks (keep screen on, media autoplay, immersive mode) are in `MainActivity.java`. Only native changes need a new APK (`npm run apk`, needs JDK 21 — Gradle 8.14 won't run on newer JDKs — and the Android SDK). The Android files are in `.dockerignore` and aren't in `configMapGenerator`.
+
 ## Deployment
 
 This repo's own `k8s/` + `kustomization.yaml` define the live deployment (not a separate `homelab/`-style split for this app). Key detail: `k8s/deployment.yaml` runs plain `image: nginx:alpine` and serves the app via a **ConfigMap volume mount** (`configMapGenerator` in `kustomization.yaml`) that overlays `/usr/share/nginx/html` — it does **not** use the Docker image built by `.github/workflows/docker.yml`. **Any new static file added to the app must also be added to `configMapGenerator.files` in `kustomization.yaml`**, or it will be present in the git repo and the Docker image but silently absent from the actual k8s deployment (this has happened before — `azkar.js` was initially omitted).

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adhan</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #07130f;
+        color: #e8dfc8;
+        font-family: system-ui, sans-serif;
+        text-align: center;
+      }
+      p { color: #9fb5a8; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>No connection</h1>
+      <p>Adhan loads from adhan.shafi.org. Retrying every 30 seconds…</p>
+    </main>
+    <script>
+      // Shown by Capacitor (server.errorPath) when the live site can't load.
+      setInterval(() => {
+        location.href = "https://adhan.shafi.org/";
+      }, 30000);
+    </script>
+  </body>
+</html>

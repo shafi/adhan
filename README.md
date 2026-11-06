@@ -44,3 +44,19 @@ Tap ⚙ to open Settings, where you can change the prayer-time calculation metho
 ## Nearby masjid lookup
 
 In Settings, enter a Claude API key (stored only in `localStorage`, never sent anywhere but `api.anthropic.com`). Once set and geolocation succeeds, the app asks Claude (with web search) to find the closest masjid and its iqama times, caching the result and refreshing once every 24 hours.
+
+## Android app
+
+`android/` is a [Capacitor](https://capacitorjs.com) shell for sideloading onto tablets. It does **not** bundle a copy of the web app: it loads the live site (`server.url` in `capacitor.config.json`), so every web deploy reaches the Android app automatically, with no rebuild or reinstall. Cloudflare's edge cache applies to the app too. `android-www/offline.html` is the only bundled page, shown while the site is unreachable.
+
+The app adds what a browser tab can't do: it keeps the screen on, runs fullscreen, autoplays the adhan without a tap, and, when the app is backgrounded or the screen locks, schedules native notifications for the next 7 days of adhans (sound: the bundled `android/app/src/main/res/raw/adhan.mp3` / `adhan_fajr.mp3`). These are cancelled on resume so the in-app reciter plays instead. That logic lives in `app.js` behind the `nativeApp` guard, and is a no-op in browsers.
+
+Build (needs Node, JDK 21 and the Android SDK with `ANDROID_HOME` set):
+
+```sh
+npm install
+npm run apk
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Only native changes (`android/`, `capacitor.config.json`, plugins) need a new APK.

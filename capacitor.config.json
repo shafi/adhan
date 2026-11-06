@@ -1,0 +1,9 @@
+{
+  "appId": "org.shafi.adhan",
+  "appName": "Adhan",
+  "webDir": "android-www",
+  "server": {
+    "url": "https://adhan.shafi.org",
+    "errorPath": "offline.html"
+  }
+}

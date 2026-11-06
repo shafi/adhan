@@ -127,6 +127,11 @@ const elements = {
   showUpcomingToggle: document.getElementById("showUpcomingToggle"),
 };
 
+// The Android app is a Capacitor shell that loads this same site, so any
+// Android-only behavior lives here behind this guard (null in a browser).
+const nativeApp = window.Capacitor?.isNativePlatform?.() ? window.Capacitor : null;
+const NATIVE_SCHEDULE_DAYS = 7;
+
 elements.methodSelect.value = state.method;
 elements.showDuaToggle.checked = state.showDua;
 elements.showUpcomingToggle.checked = state.showUpcoming;
@@ -139,6 +144,7 @@ renderMasjidCard();
 elements.upcomingStrip.hidden = !state.showUpcoming;
 renderDuaOfDay();
 renderUpcomingEvents();
+if (nativeApp) initNativeAdhan();
 
 elements.showDuaToggle.addEventListener("change", () => {
   state.showDua = elements.showDuaToggle.checked;
@@ -526,6 +532,49 @@ async function requestWakeLock() {
     await navigator.wakeLock.request("screen");
   } catch {
     // Kiosk browsers often manage screen wake separately.
+  }
+}
+
+// In-app <audio> playback (maybePlayAdhan) only runs while the page is in the
+// foreground. When the Android app is backgrounded or the screen locks, hand
+// the upcoming adhans to native scheduled notifications whose channel sound is
+// a bundled adhan; cancel them again on resume so nothing plays twice.
+async function initNativeAdhan() {
+  const notify = (method, options = {}) => nativeApp.nativePromise("LocalNotifications", method, options);
+  try {
+    await notify("requestPermissions");
+    await notify("createChannel", { id: "adhan", name: "Adhan", importance: 5, visibility: 1, sound: "adhan.mp3" });
+    await notify("createChannel", { id: "adhan_fajr", name: "Fajr adhan", importance: 5, visibility: 1, sound: "adhan_fajr.mp3" });
+  } catch {
+    // Without notification permission the in-app adhan still works in the foreground.
+  }
+  nativeApp.addListener("App", "pause", () => scheduleNativeAdhans().catch(() => {}));
+  nativeApp.addListener("App", "resume", () => notify("cancelAll").catch(() => {}));
+}
+
+async function scheduleNativeAdhans() {
+  await nativeApp.nativePromise("LocalNotifications", "cancelAll", {});
+  if (!state.audioEnabled || !state.coords) return;
+
+  const now = new Date();
+  const notifications = [];
+  for (let day = 0; day < NATIVE_SCHEDULE_DAYS; day += 1) {
+    const date = new Date(now);
+    date.setDate(date.getDate() + day);
+    const times = calculatePrayerTimes(date, state.coords.lat, state.coords.lon, state.method);
+    ADHAN_PRAYERS.forEach((name, index) => {
+      if (!state.prayerAudio[name] || times[name] <= now) return;
+      notifications.push({
+        id: day * 10 + index + 1,
+        title: `${name} ${PRAYER_ARABIC[name]}`,
+        body: `It's time for ${name}.`,
+        channelId: name === "Fajr" ? "adhan_fajr" : "adhan",
+        schedule: { at: times[name].toISOString(), allowWhileIdle: true },
+      });
+    });
+  }
+  if (notifications.length) {
+    await nativeApp.nativePromise("LocalNotifications", "schedule", { notifications });
   }
 }
 
