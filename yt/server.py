@@ -57,9 +57,13 @@ QUERIES = {
     ],
 }
 FAJR_WORDS = re.compile(r"\b(fajr|fajar|fajer|الفجر|فجر)\b")
+# Titles must name the adhan itself, which rules out whole-prayer videos like
+# "The Fajr Prayer". The Arabic forms skip \b because the "ال" prefix
+# (الأذان) is part of the same word.
+ADHAN_WORDS = re.compile(r"\b(adhaa?n|azaa?n|adzan|athan|adan|ezan|call to prayer)\b|أذان|اذان")
 EXCLUDED_WORDS = re.compile(
-    r"\b(hours?|live|compilation|ringtone|shia|nasheed|quran|recitation"
-    r"|tilawa[th]?|iqamah?|kids|cartoon|reaction|مباشر|إقامة|اقامة|ساعة|ساعات)\b"
+    r"\b(hours?|live|compilation|ringtone|shia|nasheed|quran|recitation|(re)?mix(ed)?"
+    r"|tilawa[th]?|iqamah?|kids|cartoon|reaction|مباشر|إقامة|اقامة|ساعة|ساعات|ريمكس)\b"
 )
 MIN_SECONDS, MAX_SECONDS = 60, 600
 AUDIO_TYPES = {".m4a": "audio/mp4", ".webm": "audio/webm", ".opus": "audio/ogg", ".mp3": "audio/mpeg"}
@@ -97,7 +101,7 @@ def is_candidate(kind, entry):
     views = entry.get("view_count") or 0
     if not (MIN_SECONDS <= duration <= MAX_SECONDS) or views < MIN_VIEWS:
         return False
-    if EXCLUDED_WORDS.search(title):
+    if EXCLUDED_WORDS.search(title) or not ADHAN_WORDS.search(title):
         return False
     mentions_fajr = bool(FAJR_WORDS.search(title))
     return mentions_fajr if kind == "fajr" else not mentions_fajr
